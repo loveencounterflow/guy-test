@@ -1,0 +1,28 @@
+{
+  "name": "guy-test",
+  "version": "0.1.0",
+  "description": "testing module for guy, the build tool",
+  "main": "lib/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loveencounterflow/guy-test.git"
+  },
+  "keywords": [
+    "build",
+    "tool",
+    "test"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/loveencounterflow/guy-test/issues"
+  },
+  "homepage": "https://github.com/loveencounterflow/guy-test",
+  "dependencies": {
+    "async": "^0.9.0",
+    "coffeenode-trm": "^0.1.17"
+  }
+}
