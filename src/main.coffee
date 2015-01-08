@@ -2,6 +2,8 @@
 
 
 ############################################################################################################
+njs_domain                = require 'domain'
+#...........................................................................................................
 TRM                       = require 'coffeenode-trm'
 rpr                       = TRM.rpr.bind TRM
 badge                     = 'TEST'
@@ -39,19 +41,19 @@ module.exports = run = ( x ) ->
   #=========================================================================================================
   # ERROR HANDLING
   #---------------------------------------------------------------------------------------------------------
-  error_handler = ( error ) =>
+  error_handler = ( test_name, error ) =>
     # throw error if error?
-    ### NB `entry[ 'name' ]` should normally match `entry[ 'caller' ][ 'function-name' ]`
-    and `entry[ 'caller' ][ 'method-name' ]` ###
-    # caller      = error[ 'caller'  ] ? ( supply_caller_to_error error )[ 'caller' ]
-    caller      = error[ 'caller'  ]
-    entry       =
-      'name':     name
-      'message':  error[ 'message' ]
-      'caller':   caller
+    # debug '©AM3b6', test_name, error
     fail_count += 1 unless caller?
-    target      = failures[ name ]?= []
-    target.push [ entry, ]
+    entry               = error[ 'caller'  ]
+    entry[ 'message' ]  = error[ 'message' ]
+    # ### TAINT test case name doesn't necessarily equal method name ###
+    # ### TAINT how do method name and function name differ? ###
+    # name                = entry[ 'method-name' ]
+    # delete entry[ 'method-name' ]
+    # delete entry[ 'function-name' ]
+    target              = failures[ test_name ]?= []
+    target.push entry
 
   #---------------------------------------------------------------------------------------------------------
   supply_caller_to_error = ( delta, error = null ) =>
@@ -60,12 +62,6 @@ module.exports = run = ( x ) ->
     fail_count       += 1
     return error
 
-  #---------------------------------------------------------------------------------------------------------
-  process.on 'uncaughtException', ( error ) ->
-    ### TAINT code duplication ###
-    supply_caller_to_error 0, error unless error[ 'caller' ]?
-    debug '©ZBBpY', error
-    error_handler error
 
   #=========================================================================================================
   # TEST METHODS
@@ -79,8 +75,16 @@ module.exports = run = ( x ) ->
     if BNP.equals P...
       pass_count       += 1
     else
-      error = new Error "not equal: #{rpr P}"
-      throw supply_caller_to_error 1, error
+      throw supply_caller_to_error 1, new Error "not equal: #{rpr P}"
+
+  #---------------------------------------------------------------------------------------------------------
+  T.ok = ( result ) ->
+    ### Tests whether `result` is strictly `true` (not only true-ish). ###
+    check_count += 1
+    if result is true
+      pass_count       += 1
+    else
+      throw supply_caller_to_error 1, new Error "not OK: #{rpr result}"
 
   #---------------------------------------------------------------------------------------------------------
   T.rsvp = ( callback ) ->
@@ -90,51 +94,71 @@ module.exports = run = ( x ) ->
       return callback P...
 
   #---------------------------------------------------------------------------------------------------------
-  T.ok = ( result ) ->
-    ### Tests whether `result` is strictly `true` (not only true-ish). ###
-    check_count += 1
-    if result is true
-      pass_count       += 1
-    else
-      fail_count       += 1
-      error             = new Error "not OK: #{rpr result}"
-      error[ 'caller' ] = ME.get_caller_description 1
-      debug '©zYIQA', error
-      throw error
-
-  #---------------------------------------------------------------------------------------------------------
   T.fail = ( message ) ->
     throw new Error message
+
 
   #=========================================================================================================
   # TEST EXECUTION
   #---------------------------------------------------------------------------------------------------------
   run = ->
-    for name, test of x
-      test = test.bind x
+    tasks = []
+
+    #-------------------------------------------------------------------------------------------------------
+    for test_name, test of x
+      test        = test.bind x
       test_count += 1
-      #.......................................................................................................
-      switch arity = test.length
-        #.....................................................................................................
-        when 1
-          try
-            test T
-          catch error
-            ### TAINT code duplication ###
-            supply_caller_to_error 0, error unless error[ 'caller' ]?
-            error_handler error
-        #.....................................................................................................
-        when 2
-          ### TAINT need ASYNC or similar to manage callbacks in concert with synhronous code ###
-          try
-            test T, error_handler
-          catch error
-            ### TAINT code duplication ###
-            supply_caller_to_error 0, error unless error[ 'caller' ]?
-            error_handler error
-        #.....................................................................................................
-        else
-          throw new Error "expected test with 1 or 2 arguments, got one with #{arity}"
+      #.....................................................................................................
+      do ( test_name, test ) =>
+        switch arity = test.length
+
+          #-------------------------------------------------------------------------------------------------
+          # SYNCHRONOUS TESTS
+          #-------------------------------------------------------------------------------------------------
+          when 1
+            #...............................................................................................
+            tasks.push ( handler ) =>
+              try
+                test T
+              catch error
+                ### TAINT code duplication ###
+                supply_caller_to_error 0, error unless error[ 'caller' ]?
+                error_handler test_name, error
+              handler()
+
+          #-------------------------------------------------------------------------------------------------
+          # ASYNCHRONOUS TESTS
+          #-------------------------------------------------------------------------------------------------
+          when 2
+            #...............................................................................................
+            tasks.push ( handler ) =>
+              domain = njs_domain.create()
+              domain.on 'error', ( error ) ->
+                ### TAINT code duplication ###
+                supply_caller_to_error 0, error unless error[ 'caller' ]?
+                error_handler test_name, error
+                handler()
+              #.............................................................................................
+              domain.run ->
+                #...........................................................................................
+                try
+                  test T, =>
+                    debug '©ILYFS', '### handler finished ok. ###'
+                    handler()
+                #...........................................................................................
+                catch error
+                  ### TAINT code duplication ###
+                  supply_caller_to_error 0, error unless error[ 'caller' ]?
+                  error_handler test_name, error
+                  handler()
+
+          #-------------------------------------------------------------------------------------------------
+          else throw new Error "expected test with 1 or 2 arguments, got one with #{arity}"
+
+    #-------------------------------------------------------------------------------------------------------
+    ASYNC.series tasks, ( error ) =>
+      throw error if error?
+      report()
 
   #---------------------------------------------------------------------------------------------------------
   report = ->
@@ -142,11 +166,16 @@ module.exports = run = ( x ) ->
     info 'check_count:  ',   check_count
     info 'pass_count:   ',   pass_count
     info 'fail_count:   ',   fail_count
-    info 'failures:     ',   failures
+    #.......................................................................................................
+    for test_name, entries of failures
+      help "test case: #{rpr test_name}"
+      #.....................................................................................................
+      for entry in entries
+        warn entry[ 'message' ]
+        warn '  ' + entry[ 'route' ] + '#' + entry[ 'line-nr' ]
+        warn '  ' + entry[ 'source' ]
 
   #---------------------------------------------------------------------------------------------------------
-  ### TANT `report` must only run on callback from `run` because async ###
   run()
-  report()
 
 
