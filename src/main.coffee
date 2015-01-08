@@ -31,7 +31,6 @@ ME = @
 
 #-----------------------------------------------------------------------------------------------------------
 module.exports = run = ( x ) ->
-  T             = {}
   test_count    = 0
   check_count   = 0
   pass_count    = 0
@@ -42,74 +41,88 @@ module.exports = run = ( x ) ->
   # ERROR HANDLING
   #---------------------------------------------------------------------------------------------------------
   error_handler = ( test_name, error ) =>
-    # throw error if error?
-    # debug '©AM3b6', test_name, error
-    fail_count += 1 unless caller?
+    debug '©oSiUR', '===='
+    fail_count         += 1
+    debug '©oSiUR', '1'
     entry               = error[ 'caller'  ]
+    debug '©oSiUR', '2'
     entry[ 'message' ]  = error[ 'message' ]
-    # ### TAINT test case name doesn't necessarily equal method name ###
-    # ### TAINT how do method name and function name differ? ###
-    # name                = entry[ 'method-name' ]
-    # delete entry[ 'method-name' ]
-    # delete entry[ 'function-name' ]
+    debug '©oSiUR', '3'
     target              = failures[ test_name ]?= []
+    debug '©oSiUR', '4'
     target.push entry
 
   #---------------------------------------------------------------------------------------------------------
-  supply_caller_to_error = ( delta, error = null ) =>
-    delta            += +1 unless error?
-    error[ 'caller' ] = BNP.get_caller_info delta, error, yes
-    fail_count       += 1
+  supply_caller_to_error = ( delta, checked, error ) =>
+    delta                += +1 unless error?
+    caller                = BNP.get_caller_info delta, error, yes
+    debug '©TCbe7', '%%%%'
+    debug '©bRf8c', '!!!!'
+    caller[ 'checked'   ] = checked
+    error[  'caller'    ] = caller
     return error
 
 
   #=========================================================================================================
   # TEST METHODS
   #---------------------------------------------------------------------------------------------------------
-  T.eq = ( P... ) ->
-    ### Tests whether all arguments are pairwise and deeply equal. Uses CoffeeNode Bits'n'Pieces' `equal`
-    for testing as (1) Node's `assert` distinguishes—unnecessarily—between shallow and deep equality, and,
-    worse, [`assert.equal` and `assert.deepEqual` are broken](https://github.com/joyent/node/issues/7161),
-    as they use JavaScript's broken `==` equality operator instead of `===`. ###
-    check_count += 1
-    if BNP.equals P...
-      pass_count       += 1
-    else
-      throw supply_caller_to_error 1, new Error "not equal: #{rpr P}"
+  new_tester = ( test_name ) ->
+    R = {}
 
-  #---------------------------------------------------------------------------------------------------------
-  T.ok = ( result ) ->
-    ### Tests whether `result` is strictly `true` (not only true-ish). ###
-    check_count += 1
-    if result is true
-      pass_count       += 1
-    else
-      throw supply_caller_to_error 1, new Error "not OK: #{rpr result}"
+    #-------------------------------------------------------------------------------------------------------
+    R.eq = ( P... ) ->
+      ### Tests whether all arguments are pairwise and deeply equal. Uses CoffeeNode Bits'n'Pieces' `equal`
+      for testing as (1) Node's `assert` distinguishes—unnecessarily—between shallow and deep equality, and,
+      worse, [`assert.equal` and `assert.deepEqual` are broken](https://github.com/joyent/node/issues/7161),
+      as they use JavaScript's broken `==` equality operator instead of `===`. ###
+      check_count += 1
+      if BNP.equals P...
+        pass_count       += 1
+      else
+        # throw supply_caller_to_error 1, yes, new Error "not equal: #{rpr P}"
+        error_handler test_name, supply_caller_to_error 1, yes, new Error "not equal: #{rpr P}"
 
-  #---------------------------------------------------------------------------------------------------------
-  T.rsvp = ( callback ) ->
-    return ( error, P... ) =>
-      ### TAINT need better error handling ###
-      throw error if error?
-      return callback P...
+    #-------------------------------------------------------------------------------------------------------
+    R.ok = ( result ) ->
+      ### Tests whether `result` is strictly `true` (not only true-ish). ###
+      check_count += 1
+      if result is true
+        pass_count       += 1
+      else
+        # throw supply_caller_to_error 1, yes, new Error "not OK: #{rpr result}"
+        error_handler test_name, supply_caller_to_error 1, yes, new Error "not OK: #{rpr result}"
 
-  #---------------------------------------------------------------------------------------------------------
-  T.fail = ( message ) ->
-    throw new Error message
+    #-------------------------------------------------------------------------------------------------------
+    R.rsvp = ( callback ) ->
+      return ( error, P... ) =>
+        ### TAINT need better error handling ###
+        throw error if error?
+        return callback P...
 
+    #-------------------------------------------------------------------------------------------------------
+    R.fail = ( message ) ->
+      throw new Error message
+
+    #-------------------------------------------------------------------------------------------------------
+    return R
 
   #=========================================================================================================
   # TEST EXECUTION
   #---------------------------------------------------------------------------------------------------------
-  run = ->
+  run = ( settings = null ) ->
+    settings               ?= {}
+    ### Timeout for asynchronous operations: ###
+    settings[ 'timeout'   ]?= 1000
+    #.......................................................................................................
     tasks = []
-
     #-------------------------------------------------------------------------------------------------------
     for test_name, test of x
       test        = test.bind x
       test_count += 1
+      T           = new_tester test_name
       #.....................................................................................................
-      do ( test_name, test ) =>
+      do ( test_name, test, T ) =>
+        #...................................................................................................
         switch arity = test.length
 
           #-------------------------------------------------------------------------------------------------
@@ -122,7 +135,7 @@ module.exports = run = ( x ) ->
                 test T
               catch error
                 ### TAINT code duplication ###
-                supply_caller_to_error 0, error unless error[ 'caller' ]?
+                supply_caller_to_error 0, no, error unless error[ 'caller' ]?
                 error_handler test_name, error
               handler()
 
@@ -134,10 +147,12 @@ module.exports = run = ( x ) ->
             tasks.push ( handler ) =>
               domain = njs_domain.create()
               domain.on 'error', ( error ) ->
+                debug '©w2yhy', 'BBBB'
                 ### TAINT code duplication ###
-                supply_caller_to_error 0, error unless error[ 'caller' ]?
+                supply_caller_to_error 0, no, error unless error[ 'caller' ]?
                 error_handler test_name, error
                 handler()
+                return null
               #.............................................................................................
               domain.run ->
                 #...........................................................................................
@@ -147,8 +162,9 @@ module.exports = run = ( x ) ->
                     handler()
                 #...........................................................................................
                 catch error
+                  debug '©4wx9Q', 'AAAA'
                   ### TAINT code duplication ###
-                  supply_caller_to_error 0, error unless error[ 'caller' ]?
+                  supply_caller_to_error 0, no, error # unless error[ 'caller' ]?
                   error_handler test_name, error
                   handler()
 
@@ -172,6 +188,7 @@ module.exports = run = ( x ) ->
       #.....................................................................................................
       for entry in entries
         warn entry[ 'message' ]
+        warn '  checked:', entry[ 'checked' ]
         warn '  ' + entry[ 'route' ] + '#' + entry[ 'line-nr' ]
         warn '  ' + entry[ 'source' ]
 
