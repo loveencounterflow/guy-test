@@ -62,21 +62,32 @@ module.exports = ( x, settings = null ) ->
 
 
   #=========================================================================================================
-  # RESULT HANDLING
+  #
   #---------------------------------------------------------------------------------------------------------
   new_result_handler_and_tester = ( test_name ) ->
     RH  = {}
     T   = {}
 
     #=========================================================================================================
-    # SUCCESS HANDLING
+    # COMPLETION
     #---------------------------------------------------------------------------------------------------------
-    RH.success_handler = ( test_name, delta ) ->
+    RH.on_completion = ( handler ) ->
+      whisper "completed: #{rpr test_name}"
+      handler()
+
 
     #=========================================================================================================
-    # ERROR HANDLING
+    # SUCCESS
     #---------------------------------------------------------------------------------------------------------
-    RH.error_handler = ( delta, checked, error ) ->
+    RH.on_success = ->
+      stats[ 'pass-count' ] += 1
+      return null
+
+
+    #=========================================================================================================
+    # ERROR
+    #---------------------------------------------------------------------------------------------------------
+    RH.on_error = ( delta, checked, error ) ->
       stats[ 'fail-count' ]  += +1
       delta                  += +1 unless error?
       entry                   = BNP.get_caller_info delta, error, yes
@@ -93,32 +104,28 @@ module.exports = ( x, settings = null ) ->
       worse, [`assert.equal` and `assert.deepEqual` are broken](https://github.com/joyent/node/issues/7161),
       as they use JavaScript's broken `==` equality operator instead of `===`. ###
       stats[ 'check-count' ] += 1
-      if BNP.equals P...
-        stats[ 'pass-count' ] += 1
-      else
-        RH.error_handler 1, yes, new Error "not equal: #{rpr P}"
+      if BNP.equals P... then RH.on_success()
+      else                    RH.on_error   1, yes, new Error "not equal: #{rpr P}"
 
     #-------------------------------------------------------------------------------------------------------
     T.ok = ( result ) ->
       ### Tests whether `result` is strictly `true` (not only true-ish). ###
       stats[ 'check-count' ] += 1
-      if result is true
-        stats[ 'pass-count' ] += 1
-      else
-        RH.error_handler 1, yes, new Error "not OK: #{rpr result}"
+      if result is true then  RH.on_success()
+      else                    RH.on_error   1, yes, new Error "not OK: #{rpr result}"
 
-    #-------------------------------------------------------------------------------------------------------
-    T.rsvp = ( callback ) ->
-      return ( error, P... ) =>
-        ### TAINT need better error handling ###
-        throw error if error?
-        return callback P...
+    # #-------------------------------------------------------------------------------------------------------
+    # T.rsvp = ( callback ) ->
+    #   return ( error, P... ) =>
+    #     ### TAINT need better error handling ###
+    #     throw error if error?
+    #     return callback P...
 
     #-------------------------------------------------------------------------------------------------------
     T.fail = ( message ) ->
       ### Fail with message; do not terminate test execution. ###
       stats[ 'check-count' ] += 1
-      RH.error_handler 1, yes, new Error message
+      RH.on_error 1, yes, new Error message
 
     #-------------------------------------------------------------------------------------------------------
     return [ RH, T, ]
@@ -147,7 +154,7 @@ module.exports = ( x, settings = null ) ->
               try
                 test T
               catch error
-                RH.error_handler 0, no, error
+                RH.on_error 0, no, error
               whisper "completed: #{rpr test_name}"
               handler()
 
@@ -160,25 +167,21 @@ module.exports = ( x, settings = null ) ->
               domain = njs_domain.create()
               #.............................................................................................
               domain.on 'error', ( error ) ->
-                RH.error_handler 0, no, error
-                whisper "completed: #{rpr test_name}"
-                handler()
-                return null
+                RH.on_error 0, no, error
+                RH.on_completion handler
               #.............................................................................................
               domain.run ->
                 done = ( error ) ->
                   if error?
-                    RH.error_handler 0, no, error
-                    whisper "completed: #{rpr test_name}"
-                  handler()
+                    RH.on_error 0, no, error
+                  RH.on_completion handler
                 #...........................................................................................
                 try
                   call_with_timeout settings[ 'timeout' ], test_name, test, T, done
                 #...........................................................................................
                 catch error
-                  RH.error_handler 0, no, error
-                  whisper "completed: #{rpr test_name}"
-                  handler()
+                  RH.on_error 0, no, error
+                  RH.on_completion handler
 
           #-------------------------------------------------------------------------------------------------
           else throw new Error "expected test with 1 or 2 arguments, got one with #{arity}"
@@ -186,7 +189,6 @@ module.exports = ( x, settings = null ) ->
     #-------------------------------------------------------------------------------------------------------
     ASYNC.series tasks, ( error ) =>
       throw error if error?
-      # clearInterval keeper_id
       report()
 
   #---------------------------------------------------------------------------------------------------------
