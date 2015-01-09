@@ -78,7 +78,7 @@ module.exports = ( x, settings = null ) ->
         # clearTimeout keeper_id
         keeper_id = null
         warn "(test: #{rpr test_name}) timeout reached; proceeding with error"
-        handler new Error "sorry, timeout reached (#{rpr timeout}ms)"
+        handler new Error "sorry, timeout reached (#{rpr timeout}ms) (#{rpr test_name})"
       #.........................................................................................................
       keeper_id = setTimeout keeper, timeout
       #.........................................................................................................
@@ -159,7 +159,7 @@ module.exports = ( x, settings = null ) ->
       test                    = test.bind x
       [ RH, T, ]              = new_result_handler_and_tester test_name
       #.....................................................................................................
-      do ( test_name, test, T ) =>
+      do ( test_name, test, RH, T ) =>
         #...................................................................................................
         switch arity = test.length
 
@@ -211,10 +211,9 @@ module.exports = ( x, settings = null ) ->
 
   #---------------------------------------------------------------------------------------------------------
   report = ->
-    info 'tests:   ',   stats[ 'test-count'  ]
-    info 'checks:  ',   stats[ 'check-count' ]
-    info 'passes:  ',   stats[ 'pass-count'  ]
-    info 'fails:   ',   stats[ 'fail-count'  ]
+    help "                             --=#=--"
+    help "                         GUY TEST REPORT"
+    help "                             --=#=--"
     #.......................................................................................................
     for test_name, entries of stats[ 'failures' ]
       help "test case: #{rpr test_name}"
@@ -224,6 +223,12 @@ module.exports = ( x, settings = null ) ->
         warn '  checked:', entry[ 'checked' ]
         warn '  ' + entry[ 'route' ] + '#' + entry[ 'line-nr' ]
         warn '  ' + entry[ 'source' ]
+    #.......................................................................................................
+    help "Aggregated figures:"
+    info 'tests:   ',   stats[ 'test-count'  ]
+    info 'checks:  ',   stats[ 'check-count' ]
+    info 'passes:  ',   stats[ 'pass-count'  ]
+    info 'fails:   ',   stats[ 'fail-count'  ]
 
   #---------------------------------------------------------------------------------------------------------
   run()
