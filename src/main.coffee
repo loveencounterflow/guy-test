@@ -21,43 +21,67 @@ BNP                       = require 'coffeenode-bitsnpieces'
 ASYNC                     = require 'async'
 
 
-#-----------------------------------------------------------------------------------------------------------
-ME = @
+# #-----------------------------------------------------------------------------------------------------------
+# ME = @
 
-#-----------------------------------------------------------------------------------------------------------
-@get_caller_description = ( delta = 1 ) ->
-  locator = ( BNP.get_caller_locators delta + 1 )[ 0 ]
-  return BNP.caller_description_from_locator locator
+# #-----------------------------------------------------------------------------------------------------------
+# @get_caller_description = ( delta = 1 ) ->
+#   locator = ( BNP.get_caller_locators delta + 1 )[ 0 ]
+#   return BNP.caller_description_from_locator locator
 
+
+#===========================================================================================================
+# TIMEOUT KEEPER API
 #-----------------------------------------------------------------------------------------------------------
-module.exports = run = ( x ) ->
+call_with_timeout = ( timeout, test_name, method, P..., handler ) ->
+  keeper_id = null
+  #.........................................................................................................
+  keeper = ->
+    # clearTimeout keeper_id
+    keeper_id = null
+    warn "(test: #{rpr test_name}) timeout reached; proceeding with error"
+    handler new Error "sorry, timeout reached (#{rpr timeout}ms)"
+  #.........................................................................................................
+  keeper_id = setTimeout keeper, timeout
+  #.........................................................................................................
+  method P..., ( P1... ) ->
+    if keeper_id?
+      clearTimeout keeper_id
+      keeper_id = null
+      # help "(test: #{rpr test_name}) timeout cancelled; proceeding as planned"
+      return handler P1...
+    whisper "(test: #{rpr test_name}) timeout already reached; ignoring"
+
+
+#===========================================================================================================
+# TEST RUNNER
+#-----------------------------------------------------------------------------------------------------------
+module.exports = ( x, settings = null ) ->
+  ### Timeout for asynchronous operations: ###
+  settings               ?= {}
+  settings[ 'timeout'   ]?= 1000
+  #.........................................................................................................
   test_count    = 0
   check_count   = 0
   pass_count    = 0
   fail_count    = 0
   failures      = {}
 
+
   #=========================================================================================================
   # ERROR HANDLING
   #---------------------------------------------------------------------------------------------------------
-  error_handler = ( test_name, error ) =>
-    debug '©oSiUR', '===='
+  error_handler = ( test_name, error ) ->
     fail_count         += 1
-    debug '©oSiUR', '1'
     entry               = error[ 'caller'  ]
-    debug '©oSiUR', '2'
     entry[ 'message' ]  = error[ 'message' ]
-    debug '©oSiUR', '3'
     target              = failures[ test_name ]?= []
-    debug '©oSiUR', '4'
     target.push entry
 
   #---------------------------------------------------------------------------------------------------------
-  supply_caller_to_error = ( delta, checked, error ) =>
+  supply_caller_to_error = ( delta, checked, error ) ->
     delta                += +1 unless error?
     caller                = BNP.get_caller_info delta, error, yes
-    debug '©TCbe7', '%%%%'
-    debug '©bRf8c', '!!!!'
     caller[ 'checked'   ] = checked
     error[  'caller'    ] = caller
     return error
@@ -79,7 +103,6 @@ module.exports = run = ( x ) ->
       if BNP.equals P...
         pass_count       += 1
       else
-        # throw supply_caller_to_error 1, yes, new Error "not equal: #{rpr P}"
         error_handler test_name, supply_caller_to_error 1, yes, new Error "not equal: #{rpr P}"
 
     #-------------------------------------------------------------------------------------------------------
@@ -89,7 +112,6 @@ module.exports = run = ( x ) ->
       if result is true
         pass_count       += 1
       else
-        # throw supply_caller_to_error 1, yes, new Error "not OK: #{rpr result}"
         error_handler test_name, supply_caller_to_error 1, yes, new Error "not OK: #{rpr result}"
 
     #-------------------------------------------------------------------------------------------------------
@@ -101,7 +123,8 @@ module.exports = run = ( x ) ->
 
     #-------------------------------------------------------------------------------------------------------
     R.fail = ( message ) ->
-      throw new Error message
+      ### Fail with message; do not terminate test execution. ###
+      error_handler test_name, supply_caller_to_error 1, yes, new Error message
 
     #-------------------------------------------------------------------------------------------------------
     return R
@@ -109,10 +132,9 @@ module.exports = run = ( x ) ->
   #=========================================================================================================
   # TEST EXECUTION
   #---------------------------------------------------------------------------------------------------------
-  run = ( settings = null ) ->
+  run = ->
     settings               ?= {}
-    ### Timeout for asynchronous operations: ###
-    settings[ 'timeout'   ]?= 1000
+    # keeper_id               = setInterval ( -> ), 1000
     #.......................................................................................................
     tasks = []
     #-------------------------------------------------------------------------------------------------------
@@ -130,13 +152,14 @@ module.exports = run = ( x ) ->
           #-------------------------------------------------------------------------------------------------
           when 1
             #...............................................................................................
-            tasks.push ( handler ) =>
+            tasks.push ( handler ) ->
               try
                 test T
               catch error
                 ### TAINT code duplication ###
-                supply_caller_to_error 0, no, error unless error[ 'caller' ]?
+                supply_caller_to_error 0, no, error # unless error[ 'caller' ]?
                 error_handler test_name, error
+              whisper "completed: #{rpr test_name}"
               handler()
 
           #-------------------------------------------------------------------------------------------------
@@ -144,28 +167,35 @@ module.exports = run = ( x ) ->
           #-------------------------------------------------------------------------------------------------
           when 2
             #...............................................................................................
-            tasks.push ( handler ) =>
+            tasks.push ( handler ) ->
               domain = njs_domain.create()
+              #.............................................................................................
               domain.on 'error', ( error ) ->
-                debug '©w2yhy', 'BBBB'
                 ### TAINT code duplication ###
                 supply_caller_to_error 0, no, error unless error[ 'caller' ]?
                 error_handler test_name, error
+                whisper "completed: #{rpr test_name}"
                 handler()
                 return null
               #.............................................................................................
               domain.run ->
+                done = ( error ) ->
+                  if error?
+                    ### TAINT code duplication ###
+                    supply_caller_to_error 0, no, error # unless error[ 'caller' ]?
+                    error_handler test_name, error
+                    whisper "completed: #{rpr test_name}"
+                  handler()
                 #...........................................................................................
                 try
-                  test T, =>
-                    debug '©ILYFS', '### handler finished ok. ###'
-                    handler()
+                  call_with_timeout settings[ 'timeout' ], test_name, test, T, done
+                  # test T, done
                 #...........................................................................................
                 catch error
-                  debug '©4wx9Q', 'AAAA'
                   ### TAINT code duplication ###
                   supply_caller_to_error 0, no, error # unless error[ 'caller' ]?
                   error_handler test_name, error
+                  whisper "completed: #{rpr test_name}"
                   handler()
 
           #-------------------------------------------------------------------------------------------------
@@ -174,6 +204,7 @@ module.exports = run = ( x ) ->
     #-------------------------------------------------------------------------------------------------------
     ASYNC.series tasks, ( error ) =>
       throw error if error?
+      # clearInterval keeper_id
       report()
 
   #---------------------------------------------------------------------------------------------------------
