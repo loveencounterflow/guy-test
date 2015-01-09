@@ -69,32 +69,39 @@ module.exports = ( x, settings = null ) ->
 
 
   #=========================================================================================================
-  # ERROR HANDLING
+  # RESULT HANDLING
   #---------------------------------------------------------------------------------------------------------
-  error_handler = ( test_name, error ) ->
-    fail_count         += 1
-    entry               = error[ 'caller'  ]
-    entry[ 'message' ]  = error[ 'message' ]
-    target              = failures[ test_name ]?= []
-    target.push entry
+  new_result_handler_and_tester = ( test_name ) ->
+    RH  = {}
+    T   = {}
 
-  #---------------------------------------------------------------------------------------------------------
-  supply_caller_to_error = ( delta, checked, error ) ->
-    delta                += +1 unless error?
-    caller                = BNP.get_caller_info delta, error, yes
-    caller[ 'checked'   ] = checked
-    error[  'caller'    ] = caller
-    return error
+    #=========================================================================================================
+    # SUCCESS HANDLING
+    #---------------------------------------------------------------------------------------------------------
+    RH.success_handler = ( test_name, delta ) ->
 
+    #=========================================================================================================
+    # ERROR HANDLING
+    #---------------------------------------------------------------------------------------------------------
+    RH.error_handler = ( delta, checked, error ) ->
+      delta                += +1 unless error?
+      @supply_caller_to_error delta, checked, error
+      fail_count           += 1
+      entry                 = error[ 'caller'  ]
+      entry[ 'message' ]    = error[ 'message' ]
+      target                = failures[ test_name ]?= []
+      target.push entry
 
-  #=========================================================================================================
-  # TEST METHODS
-  #---------------------------------------------------------------------------------------------------------
-  new_tester = ( test_name ) ->
-    R = {}
+    #---------------------------------------------------------------------------------------------------------
+    RH.supply_caller_to_error = ( delta, checked, error ) ->
+      delta                += +1 unless error?
+      caller                = BNP.get_caller_info delta, error, yes
+      caller[ 'checked'   ] = checked
+      error[  'caller'    ] = caller
+      return error
 
     #-------------------------------------------------------------------------------------------------------
-    R.eq = ( P... ) ->
+    T.eq = ( P... ) ->
       ### Tests whether all arguments are pairwise and deeply equal. Uses CoffeeNode Bits'n'Pieces' `equal`
       for testing as (1) Node's `assert` distinguishes—unnecessarily—between shallow and deep equality, and,
       worse, [`assert.equal` and `assert.deepEqual` are broken](https://github.com/joyent/node/issues/7161),
@@ -103,31 +110,32 @@ module.exports = ( x, settings = null ) ->
       if BNP.equals P...
         pass_count       += 1
       else
-        error_handler test_name, supply_caller_to_error 1, yes, new Error "not equal: #{rpr P}"
+        RH.error_handler 1, yes, new Error "not equal: #{rpr P}"
 
     #-------------------------------------------------------------------------------------------------------
-    R.ok = ( result ) ->
+    T.ok = ( result ) ->
       ### Tests whether `result` is strictly `true` (not only true-ish). ###
       check_count += 1
       if result is true
         pass_count       += 1
       else
-        error_handler test_name, supply_caller_to_error 1, yes, new Error "not OK: #{rpr result}"
+        RH.error_handler 1, yes, new Error "not OK: #{rpr result}"
 
     #-------------------------------------------------------------------------------------------------------
-    R.rsvp = ( callback ) ->
+    T.rsvp = ( callback ) ->
       return ( error, P... ) =>
         ### TAINT need better error handling ###
         throw error if error?
         return callback P...
 
     #-------------------------------------------------------------------------------------------------------
-    R.fail = ( message ) ->
+    T.fail = ( message ) ->
       ### Fail with message; do not terminate test execution. ###
-      error_handler test_name, supply_caller_to_error 1, yes, new Error message
+      check_count += 1
+      RH.error_handler 1, yes, new Error message
 
     #-------------------------------------------------------------------------------------------------------
-    return R
+    return [ RH, T, ]
 
   #=========================================================================================================
   # TEST EXECUTION
@@ -141,7 +149,7 @@ module.exports = ( x, settings = null ) ->
     for test_name, test of x
       test        = test.bind x
       test_count += 1
-      T           = new_tester test_name
+      [ RH, T, ]  = new_result_handler_and_tester test_name
       #.....................................................................................................
       do ( test_name, test, T ) =>
         #...................................................................................................
@@ -156,9 +164,7 @@ module.exports = ( x, settings = null ) ->
               try
                 test T
               catch error
-                ### TAINT code duplication ###
-                supply_caller_to_error 0, no, error # unless error[ 'caller' ]?
-                error_handler test_name, error
+                RH.error_handler 0, no, error
               whisper "completed: #{rpr test_name}"
               handler()
 
@@ -171,9 +177,7 @@ module.exports = ( x, settings = null ) ->
               domain = njs_domain.create()
               #.............................................................................................
               domain.on 'error', ( error ) ->
-                ### TAINT code duplication ###
-                supply_caller_to_error 0, no, error unless error[ 'caller' ]?
-                error_handler test_name, error
+                RH.error_handler 0, no, error
                 whisper "completed: #{rpr test_name}"
                 handler()
                 return null
@@ -181,20 +185,15 @@ module.exports = ( x, settings = null ) ->
               domain.run ->
                 done = ( error ) ->
                   if error?
-                    ### TAINT code duplication ###
-                    supply_caller_to_error 0, no, error # unless error[ 'caller' ]?
-                    error_handler test_name, error
+                    RH.error_handler 0, no, error
                     whisper "completed: #{rpr test_name}"
                   handler()
                 #...........................................................................................
                 try
                   call_with_timeout settings[ 'timeout' ], test_name, test, T, done
-                  # test T, done
                 #...........................................................................................
                 catch error
-                  ### TAINT code duplication ###
-                  supply_caller_to_error 0, no, error # unless error[ 'caller' ]?
-                  error_handler test_name, error
+                  RH.error_handler 0, no, error
                   whisper "completed: #{rpr test_name}"
                   handler()
 
