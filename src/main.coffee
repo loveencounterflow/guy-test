@@ -22,27 +22,27 @@ ASYNC                     = require 'async'
 
 
 
-#===========================================================================================================
-# TIMEOUT KEEPER
-#-----------------------------------------------------------------------------------------------------------
-call_with_timeout = ( timeout, test_name, method, P..., handler ) ->
-  keeper_id = null
-  #.........................................................................................................
-  keeper = ->
-    # clearTimeout keeper_id
-    keeper_id = null
-    warn "(test: #{rpr test_name}) timeout reached; proceeding with error"
-    handler new Error "sorry, timeout reached (#{rpr timeout}ms)"
-  #.........................................................................................................
-  keeper_id = setTimeout keeper, timeout
-  #.........................................................................................................
-  method P..., ( P1... ) ->
-    if keeper_id?
-      clearTimeout keeper_id
-      keeper_id = null
-      # help "(test: #{rpr test_name}) timeout cancelled; proceeding as planned"
-      return handler P1...
-    whisper "(test: #{rpr test_name}) timeout already reached; ignoring"
+# #===========================================================================================================
+# # TIMEOUT KEEPER
+# #-----------------------------------------------------------------------------------------------------------
+# call_with_timeout = ( timeout, test_name, method, P..., handler ) ->
+#   keeper_id = null
+#   #.........................................................................................................
+#   keeper = ->
+#     # clearTimeout keeper_id
+#     keeper_id = null
+#     warn "(test: #{rpr test_name}) timeout reached; proceeding with error"
+#     handler new Error "sorry, timeout reached (#{rpr timeout}ms)"
+#   #.........................................................................................................
+#   keeper_id = setTimeout keeper, timeout
+#   #.........................................................................................................
+#   method P..., ( P1... ) ->
+#     if keeper_id?
+#       clearTimeout keeper_id
+#       keeper_id = null
+#       # help "(test: #{rpr test_name}) timeout cancelled; proceeding as planned"
+#       return handler P1...
+#     whisper "(test: #{rpr test_name}) timeout already reached; ignoring"
 
 
 #===========================================================================================================
@@ -68,25 +68,41 @@ module.exports = ( x, settings = null ) ->
     RH  = {}
     T   = {}
 
-    #=========================================================================================================
-    # COMPLETION
-    #---------------------------------------------------------------------------------------------------------
+    #===========================================================================================================
+    # TIMEOUT KEEPER
+    #-----------------------------------------------------------------------------------------------------------
+    RH.call_with_timeout = ( timeout, method, P..., handler ) ->
+      keeper_id = null
+      #.........................................................................................................
+      keeper = ->
+        # clearTimeout keeper_id
+        keeper_id = null
+        warn "(test: #{rpr test_name}) timeout reached; proceeding with error"
+        handler new Error "sorry, timeout reached (#{rpr timeout}ms)"
+      #.........................................................................................................
+      keeper_id = setTimeout keeper, timeout
+      #.........................................................................................................
+      method P..., ( P1... ) ->
+        if keeper_id?
+          clearTimeout keeper_id
+          keeper_id = null
+          # help "(test: #{rpr test_name}) timeout cancelled; proceeding as planned"
+          return handler P1...
+        whisper "(test: #{rpr test_name}) timeout already reached; ignoring"
+
+    #-------------------------------------------------------------------------------------------------------
+    # COMPLETION / SUCCESS / ERROR
+    #-------------------------------------------------------------------------------------------------------
     RH.on_completion = ( handler ) ->
       whisper "completed: #{rpr test_name}"
       handler()
 
-
-    #=========================================================================================================
-    # SUCCESS
-    #---------------------------------------------------------------------------------------------------------
+    #-------------------------------------------------------------------------------------------------------
     RH.on_success = ->
       stats[ 'pass-count' ] += 1
       return null
 
-
-    #=========================================================================================================
-    # ERROR
-    #---------------------------------------------------------------------------------------------------------
+    #-------------------------------------------------------------------------------------------------------
     RH.on_error = ( delta, checked, error ) ->
       stats[ 'fail-count' ]  += +1
       delta                  += +1 unless error?
@@ -97,6 +113,8 @@ module.exports = ( x, settings = null ) ->
       ( failures[ test_name ]?= [] ).push entry
       return null
 
+    #-------------------------------------------------------------------------------------------------------
+    # CHECKS
     #-------------------------------------------------------------------------------------------------------
     T.eq = ( P... ) ->
       ### Tests whether all arguments are pairwise and deeply equal. Uses CoffeeNode Bits'n'Pieces' `equal`
@@ -177,7 +195,7 @@ module.exports = ( x, settings = null ) ->
                   RH.on_completion handler
                 #...........................................................................................
                 try
-                  call_with_timeout settings[ 'timeout' ], test_name, test, T, done
+                  RH.call_with_timeout settings[ 'timeout' ], test, T, done
                 #...........................................................................................
                 catch error
                   RH.on_error 0, no, error

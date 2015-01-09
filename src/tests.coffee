@@ -93,13 +93,13 @@ fetch_data_from_network = ( url, handler ) ->
 #     return done error if error?
 #     done()
 
-# #-----------------------------------------------------------------------------------------------------------
-# @[ "async; fails to call `done` at all" ] = ( T, done ) ->
-#   fetch_data_from_network 'http://example.com', ( error, result ) ->
-#     return done error if error?
-#     ### there should be a call to `done` here at some point, but it's missing ###
-#     # T.eq 22, 33
-#     done()
+#-----------------------------------------------------------------------------------------------------------
+@[ "async; fails to call `done` at all" ] = ( T, done ) ->
+  fetch_data_from_network 'http://example.com', ( error, result ) ->
+    return done error if error?
+    ### there should be a call to `done` here at some point, but it's missing ###
+    # T.eq 22, 33
+    # done()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "async; fails to call `done` within timeout limits" ] = ( T, done ) ->
