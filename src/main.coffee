@@ -65,16 +65,16 @@ module.exports = ( x, settings = null ) ->
   #
   #---------------------------------------------------------------------------------------------------------
   new_result_handler_and_tester = ( test_name ) ->
-    RH  = {}
-    T   = {}
+    RH        = {}
+    T         = {}
+    keeper_id = null
 
     #===========================================================================================================
     # TIMEOUT KEEPER
     #-----------------------------------------------------------------------------------------------------------
     RH.call_with_timeout = ( timeout, method, P..., handler ) ->
-      keeper_id = null
       #.........................................................................................................
-      keeper = ->
+      keeper = =>
         # clearTimeout keeper_id
         keeper_id = null
         warn "(test: #{rpr test_name}) timeout reached; proceeding with error"
@@ -82,18 +82,26 @@ module.exports = ( x, settings = null ) ->
       #.........................................................................................................
       keeper_id = setTimeout keeper, timeout
       #.........................................................................................................
-      method P..., ( P1... ) ->
+      method P..., ( P1... ) =>
         if keeper_id?
-          clearTimeout keeper_id
-          keeper_id = null
-          # help "(test: #{rpr test_name}) timeout cancelled; proceeding as planned"
+          @clear_timeout()
           return handler P1...
         whisper "(test: #{rpr test_name}) timeout already reached; ignoring"
+
+    #-------------------------------------------------------------------------------------------------------
+    RH.clear_timeout = ->
+      if keeper_id?
+        # debug '©9XSyM', "clearing timeout for #{rpr test_name}"
+        clearTimeout keeper_id
+        keeper_id = null
+        return true
+      return false
 
     #-------------------------------------------------------------------------------------------------------
     # COMPLETION / SUCCESS / ERROR
     #-------------------------------------------------------------------------------------------------------
     RH.on_completion = ( handler ) ->
+      @clear_timeout()
       whisper "completed: #{rpr test_name}"
       handler()
 
@@ -104,6 +112,7 @@ module.exports = ( x, settings = null ) ->
 
     #-------------------------------------------------------------------------------------------------------
     RH.on_error = ( delta, checked, error ) ->
+      # @clear_timeout()
       stats[ 'fail-count' ]  += +1
       delta                  += +1 unless error?
       entry                   = BNP.get_caller_info delta, error, yes
@@ -123,7 +132,7 @@ module.exports = ( x, settings = null ) ->
       as they use JavaScript's broken `==` equality operator instead of `===`. ###
       stats[ 'check-count' ] += 1
       if BNP.equals P... then RH.on_success()
-      else                    RH.on_error   1, yes, new Error "not equal: #{rpr P}"
+      else                    RH.on_error   1, yes, new Error "not equal: #{( rpr p for p in P ).join ', '}"
 
     #-------------------------------------------------------------------------------------------------------
     T.ok = ( result ) ->
@@ -155,6 +164,7 @@ module.exports = ( x, settings = null ) ->
     tasks = []
     #.......................................................................................................
     for test_name, test of x
+      continue if test_name[ 0 ] is '_'
       stats[ 'test-count' ]  += 1
       test                    = test.bind x
       [ RH, T, ]              = new_result_handler_and_tester test_name
@@ -224,11 +234,13 @@ module.exports = ( x, settings = null ) ->
         warn '  ' + entry[ 'route' ] + '#' + entry[ 'line-nr' ]
         warn '  ' + entry[ 'source' ]
     #.......................................................................................................
-    help "Aggregated figures:"
+    pass_count = stats[ 'pass-count' ]
+    fail_count = stats[ 'fail-count' ]
+    info()
     info 'tests:   ',   stats[ 'test-count'  ]
     info 'checks:  ',   stats[ 'check-count' ]
-    info 'passes:  ',   stats[ 'pass-count'  ]
-    info 'fails:   ',   stats[ 'fail-count'  ]
+    ( if fail_count > 0 then whisper  else help    ) 'passes:  ', stats[ 'pass-count'  ]
+    ( if fail_count > 0 then warn     else whisper ) 'fails:   ', fail_count
 
   #---------------------------------------------------------------------------------------------------------
   run()
