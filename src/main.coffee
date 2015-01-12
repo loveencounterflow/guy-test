@@ -18,6 +18,7 @@ urge                      = TRM.get_logger 'urge',      badge
 echo                      = TRM.echo.bind TRM
 #...........................................................................................................
 BNP                       = require 'coffeenode-bitsnpieces'
+TYPES                     = require 'coffeenode-types'
 ASYNC                     = require 'async'
 
 
@@ -56,6 +57,7 @@ module.exports = ( x, settings = null ) ->
   stats =
     'test-count':   0
     'check-count':  0
+    'meta-count':   0
     'pass-count':   0
     'fail-count':   0
     'failures':     {}
@@ -65,8 +67,8 @@ module.exports = ( x, settings = null ) ->
   #
   #---------------------------------------------------------------------------------------------------------
   new_result_handler_and_tester = ( test_name ) ->
-    RH        = {}
-    T         = {}
+    RH        = { 'name': test_name, }
+    T         = { 'name': test_name, }
     keeper_id = null
 
     #===========================================================================================================
@@ -141,18 +143,56 @@ module.exports = ( x, settings = null ) ->
       if result is true then  RH.on_success()
       else                    RH.on_error   1, yes, new Error "not OK: #{rpr result}"
 
-    # #-------------------------------------------------------------------------------------------------------
-    # T.rsvp = ( callback ) ->
-    #   return ( error, P... ) =>
-    #     ### TAINT need better error handling ###
-    #     throw error if error?
-    #     return callback P...
+    #-------------------------------------------------------------------------------------------------------
+    T.rsvp_ok = ( callback ) ->
+      return ( error, P... ) =>
+        throw error if error?
+        return callback P...
+
+    #-------------------------------------------------------------------------------------------------------
+    T.rsvp_error = ( test, callback ) ->
+      return ( error, P... ) =>
+        @test_error test, error
+        return callback P...
 
     #-------------------------------------------------------------------------------------------------------
     T.fail = ( message ) ->
       ### Fail with message; do not terminate test execution. ###
       stats[ 'check-count' ] += 1
       RH.on_error 1, yes, new Error message
+
+    #-------------------------------------------------------------------------------------------------------
+    T.test_error = ( test, error ) ->
+      switch type = TYPES.type_of test
+        when 'text'     then return @eq error?[ 'message' ], test
+        when 'jsregex'  then return @ok test.test error?[ 'message' ]
+        when 'function' then return @ok test error
+      throw new Error "expected a text, a RegExp or a function, got a #{type}"
+
+    #-------------------------------------------------------------------------------------------------------
+    T.throws = ( test, method ) ->
+      stats[ 'check-count' ] += 1
+      try
+        method()
+      catch error
+        return @test_error test, error
+      throw new Error "expected test to fail with exception, but none was thrown"
+
+    #-------------------------------------------------------------------------------------------------------
+    T.check = ( method, callback = null ) ->
+      ### TAINT use `callback`? other handler? ###
+      try
+        method @
+      catch error
+        # debug '©x5edC', BNP.get_caller_info_stack 0, error, 100, yes
+        # debug '©x5edC', BNP.get_caller_info 0, error, yes
+        RH.on_error 0, no, error
+        # debug '©X5qsy', stats[ 'failures' ][ test_name ]
+      R =     stats[ 'failures' ][ test_name ] ? []
+      delete  stats[ 'failures' ][ test_name ]
+      stats[ 'fail-count' ] += -R.length
+      stats[ 'meta-count' ] += +R.length
+      return if callback? then callback R else R
 
     #-------------------------------------------------------------------------------------------------------
     return [ RH, T, ]
@@ -239,6 +279,7 @@ module.exports = ( x, settings = null ) ->
     info()
     info 'tests:   ',   stats[ 'test-count'  ]
     info 'checks:  ',   stats[ 'check-count' ]
+    info 'metas:   ',   stats[ 'meta-count'  ]
     ( if fail_count > 0 then whisper  else help    ) 'passes:  ', stats[ 'pass-count'  ]
     ( if fail_count > 0 then warn     else whisper ) 'fails:   ', fail_count
 
