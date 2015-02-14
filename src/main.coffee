@@ -4,21 +4,19 @@
 ############################################################################################################
 njs_domain                = require 'domain'
 #...........................................................................................................
-TRM                       = require 'coffeenode-trm'
-rpr                       = TRM.rpr.bind TRM
+CND                       = require 'cnd'
+rpr                       = CND.rpr.bind CND
 badge                     = 'TEST'
-log                       = TRM.get_logger 'plain',     badge
-info                      = TRM.get_logger 'info',      badge
-whisper                   = TRM.get_logger 'whisper',   badge
-alert                     = TRM.get_logger 'alert',     badge
-debug                     = TRM.get_logger 'debug',     badge
-warn                      = TRM.get_logger 'warn',      badge
-help                      = TRM.get_logger 'help',      badge
-urge                      = TRM.get_logger 'urge',      badge
-echo                      = TRM.echo.bind TRM
+log                       = CND.get_logger 'plain',     badge
+info                      = CND.get_logger 'info',      badge
+whisper                   = CND.get_logger 'whisper',   badge
+alert                     = CND.get_logger 'alert',     badge
+debug                     = CND.get_logger 'debug',     badge
+warn                      = CND.get_logger 'warn',      badge
+help                      = CND.get_logger 'help',      badge
+urge                      = CND.get_logger 'urge',      badge
+echo                      = CND.echo.bind CND
 #...........................................................................................................
-BNP                       = require 'coffeenode-bitsnpieces'
-TYPES                     = require 'coffeenode-types'
 ASYNC                     = require 'async'
 
 
@@ -117,7 +115,7 @@ module.exports = ( x, settings = null ) ->
       # @clear_timeout()
       stats[ 'fail-count' ]  += +1
       delta                  += +1 unless error?
-      entry                   = BNP.get_caller_info delta, error, yes
+      entry                   = CND.get_caller_info delta, error, yes
       entry[ 'checked' ]      = checked
       entry[ 'message' ]      = error[ 'message' ]
       failures                = stats[ 'failures' ]
@@ -133,7 +131,7 @@ module.exports = ( x, settings = null ) ->
       worse, [`assert.equal` and `assert.deepEqual` are broken](https://github.com/joyent/node/issues/7161),
       as they use JavaScript's broken `==` equality operator instead of `===`. ###
       stats[ 'check-count' ] += 1
-      if BNP.equals P... then RH.on_success()
+      if CND.equals P... then RH.on_success()
       else                    RH.on_error   1, yes, new Error "not equal: #{( rpr p for p in P ).join ', '}"
 
     #-------------------------------------------------------------------------------------------------------
@@ -163,7 +161,7 @@ module.exports = ( x, settings = null ) ->
 
     #-------------------------------------------------------------------------------------------------------
     T.test_error = ( test, error ) ->
-      switch type = TYPES.type_of test
+      switch type = CND.type_of test
         when 'text'     then return @eq error?[ 'message' ], test
         when 'jsregex'  then return @ok test.test error?[ 'message' ]
         when 'function' then return @ok test error
@@ -184,8 +182,8 @@ module.exports = ( x, settings = null ) ->
       try
         method @
       catch error
-        # debug '©x5edC', BNP.get_caller_info_stack 0, error, 100, yes
-        # debug '©x5edC', BNP.get_caller_info 0, error, yes
+        # debug '©x5edC', CND.get_caller_info_stack 0, error, 100, yes
+        # debug '©x5edC', CND.get_caller_info 0, error, yes
         RH.on_error 0, no, error
         # debug '©X5qsy', stats[ 'failures' ][ test_name ]
       R =     stats[ 'failures' ][ test_name ] ? []
