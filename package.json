@@ -23,7 +23,6 @@
   "homepage": "https://github.com/loveencounterflow/guy-test",
   "dependencies": {
     "async": "^0.9.0",
-    "coffeenode-trm": "^0.1.17",
-    "coffeenode-types": "^0.1.1"
+    "cnd": "^0.1.5"
   }
 }
