@@ -1,6 +1,6 @@
 {
   "name": "guy-test",
-  "version": "0.1.12",
+  "version": "1.0.0",
   "description": "testing module for guy, the build tool",
   "main": "lib/main.js",
   "scripts": {
@@ -23,6 +23,6 @@
   "homepage": "https://github.com/loveencounterflow/guy-test",
   "dependencies": {
     "async": "^0.9.0",
-    "cnd": "^0.1.5"
+    "cnd": "^1.0.1"
   }
 }
