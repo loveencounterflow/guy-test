@@ -280,6 +280,7 @@ module.exports = ( x, settings = null ) ->
     info 'metas:   ',   stats[ 'meta-count'  ]
     ( if fail_count > 0 then whisper  else help    ) 'passes:  ', stats[ 'pass-count'  ]
     ( if fail_count > 0 then warn     else whisper ) 'fails:   ', fail_count
+    process.exit fail_count
 
   #---------------------------------------------------------------------------------------------------------
   run()

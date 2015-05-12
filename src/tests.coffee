@@ -85,18 +85,18 @@ META[ "sync; calling `T.fail`, but proceeding with a successful test" ] = ( T ) 
 #-----------------------------------------------------------------------------------------------------------
 @[ "sync; `done` can be used in synchronous tests" ] = ( T, done ) ->
   n = 0
-  for idx in [ 0 ... 1e7 ]
+  for idx in [ 0 ... 1e6 ]
     n = ( Math.sin idx ) * ( Math.cos idx + 0.3 )
-  T.eq n, -0.41904553942341144
+  T.eq 1, 1
   done()
 
-# #-----------------------------------------------------------------------------------------------------------
-# @[ "sync; `throws` catches exception and tests against string" ] = ( T ) ->
-#   T.throws 'foo', ( -> throw new Error 'foo' )
+#-----------------------------------------------------------------------------------------------------------
+@[ "sync; `throws` catches exception and tests against string" ] = ( T ) ->
+  T.throws 'foo', ( -> throw new Error 'foo' )
 
-# #-----------------------------------------------------------------------------------------------------------
-# @[ "sync; `throws` catches exception and tests against regex" ] = ( T ) ->
-#   T.throws /expected!/, ( -> throw new Error 'now that was expected!' )
+#-----------------------------------------------------------------------------------------------------------
+@[ "sync; `throws` catches exception and tests against regex" ] = ( T ) ->
+  T.throws /expected!/, ( -> throw new Error 'now that was expected!' )
 
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "sync; `throws` catches exception and rejects faulty matcher" ] = ( T ) ->
