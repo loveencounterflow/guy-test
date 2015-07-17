@@ -161,6 +161,13 @@ module.exports = ( x, settings = null ) ->
       RH.on_error 1, yes, new Error message
 
     #-------------------------------------------------------------------------------------------------------
+    T.succeed = ( message ) ->
+      ### Succeed with message; do not terminate test execution. ###
+      stats[ 'check-count' ] += 1
+      help "succeded: #{message}"
+      RH.on_success message
+
+    #-------------------------------------------------------------------------------------------------------
     T.test_error = ( test, error ) ->
       switch type = CND.type_of test
         when 'text'     then return @eq error?[ 'message' ], test
