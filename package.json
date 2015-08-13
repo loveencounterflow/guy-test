@@ -23,6 +23,6 @@
   "homepage": "https://github.com/loveencounterflow/guy-test",
   "dependencies": {
     "async": "^0.9.0",
-    "cnd": "^1.0.1"
+    "cnd": "^1.0.8"
   }
 }
