@@ -100,7 +100,8 @@ META[ "sync; calling `T.fail`, but proceeding with a successful test" ] = ( T ) 
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "sync; string mismatch produces colored diff message" ] = ( T ) ->
-  T.eq "first string", "second string"
+  warn "skipping test; have to workout how to count failure as success and validate result, side-effects"
+  # T.eq "first string", "second string"
 
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "sync; `throws` catches exception and rejects faulty matcher" ] = ( T ) ->
