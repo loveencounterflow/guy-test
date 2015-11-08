@@ -138,7 +138,7 @@ module.exports = ( x, settings = null ) ->
       else
         if P.length is 2 and ( CND.isa_text p0 = P[ 0 ] ) and ( CND.isa_text p1 = P[ 1 ] )
           info "string diff:"
-          info DIFF.colorize p0, p1
+          info DIFF.colorize ( rpr p0 ), ( rpr p1 )
           message = """
           not equal: #{rpr p0}, #{rpr p1}
           strings not equal; see also diff above"""
