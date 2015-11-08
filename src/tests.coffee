@@ -98,6 +98,10 @@ META[ "sync; calling `T.fail`, but proceeding with a successful test" ] = ( T ) 
 @[ "sync; `throws` catches exception and tests against regex" ] = ( T ) ->
   T.throws /expected!/, ( -> throw new Error 'now that was expected!' )
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "sync; string mismatch produces colored diff message" ] = ( T ) ->
+  T.eq "first string", "second string"
+
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "sync; `throws` catches exception and rejects faulty matcher" ] = ( T ) ->
 #   T.throws /^expected!/, ( -> throw new Error 'now that was expected!' )

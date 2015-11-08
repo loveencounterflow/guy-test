@@ -17,6 +17,7 @@ help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
+DIFF                      = require 'coffeenode-diff'
 ASYNC                     = require 'async'
 
 
@@ -132,8 +133,18 @@ module.exports = ( x, settings = null ) ->
       worse, [`assert.equal` and `assert.deepEqual` are broken](https://github.com/joyent/node/issues/7161),
       as they use JavaScript's broken `==` equality operator instead of `===`. ###
       stats[ 'check-count' ] += 1
-      if CND.equals P... then RH.on_success()
-      else                    RH.on_error   1, yes, new Error "not equal: #{( rpr p for p in P ).join ', '}"
+      if CND.equals P...
+        RH.on_success()
+      else
+        if P.length is 2 and ( CND.isa_text p0 = P[ 0 ] ) and ( CND.isa_text p1 = P[ 1 ] )
+          info "string diff:"
+          info DIFF.colorize ( rpr p0 ), ( rpr p1 )
+          message = """
+          not equal: #{rpr p0}, #{rpr p1}
+          strings not equal; see also diff above"""
+        else
+          message = "not equal: #{( rpr p for p in P ).join ', '}"
+        RH.on_error   1, yes, new Error message
 
     #-------------------------------------------------------------------------------------------------------
     T.ok = ( result ) ->
