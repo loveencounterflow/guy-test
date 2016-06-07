@@ -39,9 +39,11 @@ META = {}
 @[ "sync; checks fail" ] = ( T ) ->
   { name } = T
   checks = T.check META[ name ]
+  # debug '6654', JSON.stringify checks[ 0 ][ 'message' ]
+  # debug '6654', JSON.stringify checks[ 1 ][ 'message' ]
   T.eq checks.length, 2
-  T.eq checks[ 0 ][ 'message' ], 'not equal: 42, 43'
-  T.eq checks[ 1 ][ 'message' ], 'not OK: false'
+  T.eq checks[ 0 ][ 'message' ], "not equal: 42, 43\nsee diff above"
+  T.eq checks[ 1 ][ 'message' ], "not OK: false"
 
 #...........................................................................................................
 META[ "sync; checks fail" ] = ( T ) ->

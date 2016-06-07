@@ -4,7 +4,10 @@
   "description": "testing module for guy, the build tool",
   "main": "lib/main.js",
   "scripts": {
-    "test": "./build && node lib/tests.js"
+    "build": "coffee --map -o lib -c src",
+    "push": "git add . && git commit -m'update' && git push -u origin master",
+    "pub": "npm run build && npm run push && npm version patch && npm publish",
+    "test": "npm run build && node lib/tests.js"
   },
   "repository": {
     "type": "git",
@@ -24,11 +27,6 @@
   "dependencies": {
     "async": "^1.5.2",
     "cnd": "^3.0.4",
-    "coffeenode-diff": "^0.3.1"
-  },
-  "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-coffee": "^2.3.2",
-    "gulp-sourcemaps": "^1.6.0"
+    "diff": "^2.2.3"
   }
 }
