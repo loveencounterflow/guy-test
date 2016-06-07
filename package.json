@@ -22,13 +22,13 @@
   },
   "homepage": "https://github.com/loveencounterflow/guy-test",
   "dependencies": {
-    "async": "^0.9.0",
+    "async": "^1.5.2",
     "cnd": "^3.0.4",
     "coffeenode-diff": "^0.3.1"
   },
   "devDependencies": {
-    "gulp": "^3.9.0",
-    "gulp-coffee": "^2.3.1",
+    "gulp": "^3.9.1",
+    "gulp-coffee": "^2.3.2",
     "gulp-sourcemaps": "^1.6.0"
   }
 }
