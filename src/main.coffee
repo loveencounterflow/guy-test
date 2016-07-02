@@ -17,8 +17,17 @@ help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
-DIFF                      = require 'coffeenode-diff'
 ASYNC                     = require 'async'
+DIFF                      = require 'diff'
+
+
+#-----------------------------------------------------------------------------------------------------------
+diff = ( a, b ) ->
+  parts = []
+  for part in DIFF.diffChars a, b
+    color = if part.added then 'green' else ( if part.removed then 'red' else 'white' )
+    parts.push CND[ color ] part.value
+  return parts.join ''
 
 
 
@@ -137,12 +146,12 @@ module.exports = ( x, settings = null ) ->
       if CND.equals P...
         RH.on_success()
       else
-        if P.length is 2 and ( CND.isa_text p0 = P[ 0 ] ) and ( CND.isa_text p1 = P[ 1 ] )
+        if P.length is 2 # and ( CND.isa_text p0 = P[ 0 ] ) and ( CND.isa_text p1 = P[ 1 ] )
           info "string diff:"
-          info DIFF.colorize ( rpr p0 ), ( rpr p1 )
+          info diff ( rpr P[ 0 ] ), ( rpr P[ 1 ] )
           message = """
-          not equal: #{rpr p0}, #{rpr p1}
-          strings not equal; see also diff above"""
+          not equal: #{rpr P[ 0 ]}, #{rpr P[ 1 ]}
+          see diff above"""
         else
           message = "not equal: #{( rpr p for p in P ).join ', '}"
         RH.on_error   1, yes, new Error message
@@ -183,9 +192,9 @@ module.exports = ( x, settings = null ) ->
     T.test_error = ( test, error ) ->
       switch type = CND.type_of test
         when 'text'     then return @eq error?[ 'message' ], test
-        when 'jsregex'  then return @ok test.test error?[ 'message' ]
+        when 'regex'    then return @ok test.test error?[ 'message' ]
         when 'function' then return @ok test error
-      throw new Error "expected a text, a RegExp or a function, got a #{type}"
+      throw new Error "expected a text, a RegEx or a function, got a #{type}"
 
     #-------------------------------------------------------------------------------------------------------
     T.throws = ( test, method ) ->
