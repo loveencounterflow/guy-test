@@ -5,7 +5,7 @@
   "main": "lib/main.js",
   "scripts": {
     "build": "coffee --map -o lib -c src",
-    "push": "git add . && git commit -m'update' && git push -u origin master",
+    "push": "git add . && git commit -m'update' && git push",
     "pub": "npm run build && npm run push && npm version patch && npm publish",
     "test": "npm run build && node lib/tests.js"
   },
@@ -26,7 +26,8 @@
   "homepage": "https://github.com/loveencounterflow/guy-test",
   "dependencies": {
     "async": "^1.5.2",
-    "cnd": "^3.0.4",
-    "diff": "^2.2.3"
+    "cnd": "^4.0.4",
+    "diff": "^2.2.3",
+    "equals": "^1.0.5"
   }
 }
