@@ -39,11 +39,13 @@ META = {}
 @[ "sync; checks fail" ] = ( T ) ->
   { name } = T
   checks = T.check META[ name ]
+  # debug '6654', checks
   # debug '6654', JSON.stringify checks[ 0 ][ 'message' ]
   # debug '6654', JSON.stringify checks[ 1 ][ 'message' ]
   T.eq checks.length, 2
-  T.eq checks[ 0 ][ 'message' ], "not equal: 42, 43\nsee diff above"
-  T.eq checks[ 1 ][ 'message' ], "not OK: false"
+  # debug '6654-1', rpr CND.remove_colors checks[ 0 ][ 'message' ]
+  T.eq ( CND.remove_colors checks[ 0 ][ 'message' ] ), 'not equal:\n42\n43\nsee diff above'
+  T.eq ( CND.remove_colors checks[ 1 ][ 'message' ] ), "not OK: false"
 
 #...........................................................................................................
 META[ "sync; checks fail" ] = ( T ) ->
@@ -99,6 +101,10 @@ META[ "sync; calling `T.fail`, but proceeding with a successful test" ] = ( T ) 
 #-----------------------------------------------------------------------------------------------------------
 @[ "sync; `throws` catches exception and tests against regex" ] = ( T ) ->
   T.throws /expected!/, ( -> throw new Error 'now that was expected!' )
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "sync; show error message (demo)" ] = ( T ) ->
+  T.eq "this is the result, man", "This is what I expected, man!"
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "sync; string mismatch produces colored diff message" ] = ( T ) ->

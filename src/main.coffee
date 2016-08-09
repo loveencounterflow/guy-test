@@ -19,7 +19,6 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 ASYNC                     = require 'async'
 DIFF                      = require 'diff'
-equals                    = require 'equals'
 
 #-----------------------------------------------------------------------------------------------------------
 diff = ( a, b ) ->
@@ -142,15 +141,17 @@ module.exports = ( x, settings = null ) ->
       worse, [`assert.equal` and `assert.deepEqual` are broken](https://github.com/joyent/node/issues/7161),
       as they use JavaScript's broken `==` equality operator instead of `===`. ###
       stats[ 'check-count' ] += 1
-      if equals P...
+      if CND.equals P...
         RH.on_success()
       else
         if P.length is 2 # and ( CND.isa_text p0 = P[ 0 ] ) and ( CND.isa_text p1 = P[ 1 ] )
           info "string diff:"
           info diff ( rpr P[ 0 ] ), ( rpr P[ 1 ] )
           message = """
-          not equal: #{rpr P[ 0 ]}, #{rpr P[ 1 ]}
-          see diff above"""
+          not equal:
+          #{CND.white   rpr P[ 0 ]}
+          #{CND.yellow  rpr P[ 1 ]}
+          """
         else
           message = "not equal: #{( rpr p for p in P ).join ', '}"
         RH.on_error   1, yes, new Error message
