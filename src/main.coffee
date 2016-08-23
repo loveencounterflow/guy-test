@@ -20,7 +20,6 @@ echo                      = CND.echo.bind CND
 ASYNC                     = require 'async'
 DIFF                      = require 'diff'
 
-
 #-----------------------------------------------------------------------------------------------------------
 diff = ( a, b ) ->
   parts = []
@@ -150,8 +149,10 @@ module.exports = ( x, settings = null ) ->
           info "string diff:"
           info diff ( rpr P[ 0 ] ), ( rpr P[ 1 ] )
           message = """
-          not equal: #{rpr P[ 0 ]}, #{rpr P[ 1 ]}
-          see diff above"""
+          not equal:
+          #{CND.white   rpr P[ 0 ]}
+          #{CND.yellow  rpr P[ 1 ]}
+          """
         else
           message = "not equal: #{( rpr p for p in P ).join ', '}"
         RH.on_error   1, yes, new Error message

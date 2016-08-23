@@ -1,11 +1,11 @@
 {
   "name": "guy-test",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "testing module for guy, the build tool",
   "main": "lib/main.js",
   "scripts": {
     "build": "coffee --map -o lib -c src",
-    "push": "git add . && git commit -m'update' && git push -u origin master",
+    "push": "git add . && git commit -m'update' && git push",
     "pub": "npm run build && npm run push && npm version patch && npm publish",
     "test": "npm run build && node lib/tests.js"
   },
@@ -25,8 +25,8 @@
   },
   "homepage": "https://github.com/loveencounterflow/guy-test",
   "dependencies": {
-    "async": "^1.5.2",
-    "cnd": "^3.2.0",
+    "async": "^2.0.1",
+    "cnd": "^4.0.4",
     "diff": "^2.2.3"
   }
 }
