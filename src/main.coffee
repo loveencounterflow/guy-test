@@ -57,6 +57,7 @@ diff = ( a, b ) ->
 # TEST RUNNER
 #-----------------------------------------------------------------------------------------------------------
 module.exports = ( x, settings = null ) ->
+  ### TAINT should accept a handler in case testing contains asynchronous functions ###
   ### Timeout for asynchronous operations: ###
   settings               ?= {}
   settings[ 'timeout'   ]?= 1000
