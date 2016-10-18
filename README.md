@@ -39,3 +39,19 @@ go-use-yak
 great useful yak
 
  -->
+
+## ToDo
+
+* [ ] use JSON diffpatch to visualize failure of T.eq / CND.equals
+
+
+JSON DiffPatch:
+* https://www.npmjs.com/package/js-schema-6901
+* https://www.npmjs.com/package/rfc6902
+* https://github.com/benjamine/JsonDiffPatch
+* https://benjamine.github.io/jsondiffpatch/demo/index.html
+* https://github.com/wbish/jsondiffpatch.net
+
+
+
+

@@ -125,7 +125,10 @@ module.exports = ( x, settings = null ) ->
       # @clear_timeout()
       stats[ 'fail-count' ]  += +1
       delta                  += +1 unless error?
-      entry                   = CND.get_caller_info delta, error, yes
+      try
+        entry = CND.get_caller_info delta, error, yes
+      catch
+        throw error
       entry[ 'checked' ]      = checked
       entry[ 'message' ]      = error[ 'message' ]
       failures                = stats[ 'failures' ]
