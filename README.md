@@ -43,7 +43,15 @@ great useful yak
 ## ToDo
 
 * [ ] use JSON diffpatch to visualize failure of T.eq / CND.equals
-
+* [ ] modify or remove use of CND.get_caller_info
+* [ ] must honor callbacks, work not only from command line but also within setups where program continues
+  when tests have finished
+* [ ] i'm tired of having to include guy-test in each and every module; it really should be treated like
+  `coffee`, `stylus`, `doctoc` etcpp. and indeed `node` itself, i.e. as a build dependency that
+  has to be present per default.
+* [ ] in order to avoid compulsory eternal backwards-compatibility, future versions of guy-test will
+  be published **with version numbers or version names** within the package name for each new version
+  with braking changes, e.g. guy-test-alpha
 
 JSON DiffPatch:
 * https://www.npmjs.com/package/js-schema-6901

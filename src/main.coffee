@@ -130,6 +130,7 @@ module.exports = ( x, settings = null ) ->
         entry = CND.get_caller_info delta, error, yes
       catch
         throw error
+      throw error unless entry?
       entry[ 'checked' ]      = checked
       entry[ 'message' ]      = error[ 'message' ]
       failures                = stats[ 'failures' ]
