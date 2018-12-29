@@ -20,6 +20,7 @@ echo                      = CND.echo.bind CND
 ASYNC                     = require 'async'
 DIFF                      = require 'diff'
 is_callable               = ( x ) -> ( Object::toString.call x ) in [ '[object Function]', '[object AsyncFunction]', ]
+{ jr }                    = CND
 
 #-----------------------------------------------------------------------------------------------------------
 diff = ( a, b ) ->
@@ -41,7 +42,7 @@ diff = ( a, b ) ->
 #     # clearTimeout keeper_id
 #     keeper_id = null
 #     warn "(test: #{rpr test_name}) timeout reached; proceeding with error"
-#     handler new Error "sorry, timeout reached (#{rpr timeout}ms)"
+#     handler new Error "µ64748 sorry, timeout reached (#{rpr timeout}ms)"
 #   #.........................................................................................................
 #   keeper_id = setTimeout keeper, timeout
 #   #.........................................................................................................
@@ -89,7 +90,7 @@ module.exports = ( x, settings = null ) ->
         # clearTimeout keeper_id
         keeper_id = null
         warn "(test: #{rpr test_name}) timeout reached; proceeding with error"
-        handler new Error "sorry, timeout reached (#{rpr timeout}ms) (#{rpr test_name})"
+        handler new Error "µ65513 sorry, timeout reached (#{rpr timeout}ms) (#{rpr test_name})"
       #.....................................................................................................
       keeper_id = setTimeout keeper, timeout
       whisper "started:   #{rpr test_name}"
@@ -133,7 +134,7 @@ module.exports = ( x, settings = null ) ->
         throw error
       throw error unless entry?
       entry[ 'checked' ]      = checked
-      entry[ 'message' ]      = error?[ 'message' ] ? "µ98841 Guy-test: received `null` as error"
+      entry[ 'message' ]      = error?[ 'message' ] ? "µ66278 Guy-test: received `null` as error"
       failures                = stats[ 'failures' ]
       ( failures[ test_name ]?= [] ).push entry
       return null
@@ -167,7 +168,7 @@ module.exports = ( x, settings = null ) ->
       ### Tests whether `result` is strictly `true` (not only true-ish). ###
       stats[ 'check-count' ] += 1
       if result is true then  RH.on_success()
-      else                    RH.on_error   1, yes, new Error "not OK: #{rpr result}"
+      else                    RH.on_error   1, yes, new Error "µ67043 not OK: #{rpr result}"
 
     #-------------------------------------------------------------------------------------------------------
     T.rsvp_ok = ( callback ) ->
@@ -200,7 +201,7 @@ module.exports = ( x, settings = null ) ->
         when 'text'     then return @eq error?[ 'message' ], test
         when 'regex'    then return @ok test.test error?[ 'message' ]
         when 'function' then return @ok test error
-      throw new Error "expected a text, a RegEx or a function, got a #{type}"
+      throw new Error "µ67808 expected a text, a RegEx or a function, got a #{type}"
 
     #-------------------------------------------------------------------------------------------------------
     T.throws = ( test, method ) ->
@@ -209,7 +210,7 @@ module.exports = ( x, settings = null ) ->
         method()
       catch error
         return @test_error test, error
-      throw new Error "expected test to fail with exception, but none was thrown"
+      throw new Error "µ68573 expected test to fail with exception, but none was thrown"
 
     #-------------------------------------------------------------------------------------------------------
     T.check = ( method, callback = null ) ->
@@ -318,7 +319,7 @@ module.exports = ( x, settings = null ) ->
                   RH.on_completion handler
 
           #-------------------------------------------------------------------------------------------------
-          else throw new Error "expected test with 1 or 2 arguments, got one with #{arity}"
+          else throw new Error "µ73928 expected test with 1 or 2 arguments, got one with #{arity}"
 
     #-------------------------------------------------------------------------------------------------------
     ASYNC.series tasks, ( error ) =>
