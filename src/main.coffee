@@ -228,6 +228,37 @@ module.exports = ( x, settings = null ) ->
       return if callback? then callback R else R
 
     #-------------------------------------------------------------------------------------------------------
+    T.perform = ( probe, matcher, error_pattern, method ) ->
+      switch ( arity = arguments.length )
+        when 3 then [ probe, matcher, error_pattern, method, ] = [ probe, matcher, null, error_pattern, ]
+        when 4 then null
+        else throw new Error "µ69338 expected 3 or 4 arguments, got #{arity}"
+      throw new Error "µ70103 expected a function, got a #{CND.type_of method}" unless is_callable method
+      message_re = new RegExp error_pattern if error_pattern?
+      try
+        result = await method()
+      catch error
+        # throw error
+        if message_re? and ( message_re.test error.message )
+          echo CND.green jr [ probe, null, error_pattern, ]
+          @ok true
+        else
+          echo CND.indigo "µ70868 unexpected exception", ( jr [ probe, null, error.message, ] )
+          @fail "µ71633 unexpected exception for probe #{jr probe}:\n#{error.message}"
+          # return reject "µ72398 failed with #{error.message}"
+        return null
+      if error_pattern?
+        echo CND.MAGENTA "#{jr [ probe, result, null, ]} #! expected error: #{jr error_pattern}"
+        @fail "µ73163 expected error, obtained result #{jr result}"
+      else if CND.equals result, matcher
+        @ok true
+        echo CND.lime jr [ probe, result, null, ]
+      else
+        @fail "µ73773 neq: result #{jr result}, matcher #{jr matcher}"
+        echo CND.red "#{jr [ probe, result, null, ]} #! expected result: #{jr matcher}"
+      return result
+
+    #-------------------------------------------------------------------------------------------------------
     return [ RH, T, ]
 
   #=========================================================================================================
