@@ -36,7 +36,7 @@ META = {}
 #===========================================================================================================
 # SYNCHRONOUS TESTS
 #-----------------------------------------------------------------------------------------------------------
-@[ "sync; checks fail" ] = ( T ) ->
+@[ "_sync; checks fail" ] = ( T ) ->
   { name } = T
   checks = T.check META[ name ]
   # debug '6654', checks
@@ -103,7 +103,7 @@ META[ "sync; calling `T.fail`, but proceeding with a successful test" ] = ( T ) 
   T.throws /expected!/, ( -> throw new Error 'now that was expected!' )
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "sync; show error message (demo)" ] = ( T ) ->
+@[ "_sync; show error message (demo)" ] = ( T ) ->
   T.eq "this is the result, man", "This is what I expected, man!"
 
 #-----------------------------------------------------------------------------------------------------------
