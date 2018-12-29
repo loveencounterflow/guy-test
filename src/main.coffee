@@ -133,7 +133,7 @@ module.exports = ( x, settings = null ) ->
         throw error
       throw error unless entry?
       entry[ 'checked' ]      = checked
-      entry[ 'message' ]      = error[ 'message' ]
+      entry[ 'message' ]      = error?[ 'message' ] ? "µ98841 Guy-test: received `null` as error"
       failures                = stats[ 'failures' ]
       ( failures[ test_name ]?= [] ).push entry
       return null
