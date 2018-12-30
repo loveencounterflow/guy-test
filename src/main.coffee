@@ -245,7 +245,9 @@ module.exports = ( x, settings = null ) ->
           @ok true
         else
           echo CND.indigo "µ70868 unexpected exception", ( jr [ probe, null, error.message, ] )
-          @fail "µ71633 unexpected exception for probe #{jr probe}:\n#{error.message}"
+          stack = ( error.stack.split '\n' )[ 1 .. 5 ].join '\n'
+          @fail "µ71633 unexpected exception for probe #{jr probe}:\n#{error.message}\n#{stack}"
+          # whisper 'µ71634', ( error.stack.split '\n' )[ .. 10 ].join '\n'
           # return reject "µ72398 failed with #{error.message}"
         return null
       if error_pattern?
