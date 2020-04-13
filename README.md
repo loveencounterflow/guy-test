@@ -3,6 +3,7 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [guy-test](#guy-test)
+  - [ToDo](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -52,6 +53,7 @@ great useful yak
 * [ ] in order to avoid compulsory eternal backwards-compatibility, future versions of guy-test will
   be published **with version numbers or version names** within the package name for each new version
   with braking changes, e.g. guy-test-alpha
+* [ ] use InterText `rpr()` instead of `JSON.stringify`
 
 JSON DiffPatch:
 * https://www.npmjs.com/package/js-schema-6901
