@@ -53,7 +53,7 @@ great useful yak
 * [ ] in order to avoid compulsory eternal backwards-compatibility, future versions of guy-test will
   be published **with version numbers or version names** within the package name for each new version
   with braking changes, e.g. guy-test-alpha
-* [ ] use InterText `rpr()` instead of `JSON.stringify`
+* [X] use InterText `rpr()` instead of `JSON.stringify`
 
 JSON DiffPatch:
 * https://www.npmjs.com/package/js-schema-6901
