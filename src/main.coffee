@@ -5,7 +5,7 @@
 njs_domain                = require 'domain'
 #...........................................................................................................
 CND                       = require 'cnd'
-rpr                       = CND.rpr.bind CND
+# rpr                       = CND.rpr.bind CND
 badge                     = 'TEST'
 log                       = CND.get_logger 'plain',     badge
 info                      = CND.get_logger 'info',      badge
@@ -18,17 +18,23 @@ urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
 ASYNC                     = require 'async'
-DIFF                      = require 'diff'
+# DIFF                      = require 'diff'
 is_callable               = ( x ) -> ( Object::toString.call x ) in [ '[object Function]', '[object AsyncFunction]', ]
-{ jr }                    = CND
-
+# { jr }                    = CND
 #-----------------------------------------------------------------------------------------------------------
-diff = ( a, b ) ->
-  parts = []
-  for part in DIFF.diffChars a, b
-    color = if part.added then 'green' else ( if part.removed then 'red' else 'white' )
-    parts.push CND[ color ] part.value
-  return parts.join ''
+rpr = jr = ( P... ) ->
+  return ( ( inspect x, rpr_settings ) for x in P ).join ' '
+{ inspect }   = require 'util'
+rpr_settings  = { depth: Infinity, maxArrayLength: Infinity, breakLength: Infinity, compact: true, }
+
+
+# #-----------------------------------------------------------------------------------------------------------
+# diff = ( a, b ) ->
+#   parts = []
+#   for part in DIFF.diffChars a, b
+#     color = if part.added then 'green' else ( if part.removed then 'red' else 'white' )
+#     parts.push CND[ color ] part.value
+#   return parts.join ''
 
 
 
@@ -151,16 +157,16 @@ module.exports = ( x, settings = null ) ->
       if CND.equals P...
         RH.on_success()
       else
-        if P.length is 2 # and ( CND.isa_text p0 = P[ 0 ] ) and ( CND.isa_text p1 = P[ 1 ] )
-          info "string diff:"
-          info diff ( rpr P[ 0 ] ), ( rpr P[ 1 ] )
-          message = """
-          not equal:
-          #{CND.white   rpr P[ 0 ]}
-          #{CND.yellow  rpr P[ 1 ]}
-          """
-        else
-          message = "not equal: #{( rpr p for p in P ).join ', '}"
+        # if P.length is 2 # and ( CND.isa_text p0 = P[ 0 ] ) and ( CND.isa_text p1 = P[ 1 ] )
+        #   info "string diff:"
+        #   info diff ( rpr P[ 0 ] ), ( rpr P[ 1 ] )
+        #   message = """
+        #   not equal:
+        #   #{CND.white   rpr P[ 0 ]}
+        #   #{CND.yellow  rpr P[ 1 ]}
+        #   """
+        # else
+        message = "not equal: #{( rpr p for p in P ).join ', '}"
         RH.on_error   1, yes, new Error message
 
     #-------------------------------------------------------------------------------------------------------
@@ -258,7 +264,7 @@ module.exports = ( x, settings = null ) ->
         echo CND.lime jr [ probe, result, null, ]
       else
         @fail "µ73773 neq: result #{jr result}, matcher #{jr matcher}"
-        echo CND.red "#{jr [ probe, result, null, ]} #! expected result: #{jr matcher}"
+        # echo CND.red "#{jr [ probe, result, null, ]} #! expected result: #{jr matcher}"echo CND.red "#{jr [ probe, result, null, ]}"
       return result
 
     #-------------------------------------------------------------------------------------------------------

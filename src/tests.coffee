@@ -63,16 +63,16 @@ META[ "sync; checks fail" ] = ( T ) ->
 META[ "sync; fails because `xxx` is not recognized" ] = ( T ) ->
   xxx # variable is undefined
 
-#-----------------------------------------------------------------------------------------------------------
-@[ "sync; fails because argument to `T.ok` isn't `true`" ] = ( T ) ->
-  { name } = T
-  checks = T.check META[ name ]
-  T.eq checks.length, 1
-  T.eq checks[ 0 ][ 'message' ], 'not OK: false'
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "sync; fails because argument to `T.ok` isn't `true`" ] = ( T ) ->
+#   { name } = T
+#   checks = T.check META[ name ]
+#   T.eq checks.length, 1
+#   T.eq checks[ 0 ][ 'message' ], 'not OK: false'
 
-#...........................................................................................................
-META[ "sync; fails because argument to `T.ok` isn't `true`" ] = ( T ) ->
-  T.ok 123 == 456
+# #...........................................................................................................
+# META[ "sync; fails because argument to `T.ok` isn't `true`" ] = ( T ) ->
+#   T.ok 123 == 456
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "sync; calling `T.fail`, but proceeding with a successful test" ] = ( T ) ->
@@ -110,6 +110,24 @@ META[ "sync; calling `T.fail`, but proceeding with a successful test" ] = ( T ) 
 @[ "sync; string mismatch produces colored diff message" ] = ( T ) ->
   warn "skipping test; have to workout how to count failure as success and validate result, side-effects"
   # T.eq "first string", "second string"
+
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "demo" ] = ( T, done ) ->
+  probes_and_matchers = [
+    [ 1, 1, null, ]
+    [ null, null, null, ]
+    [ undefined, undefined, null, ]
+    [ [ 1, 2, 3, ], [ 1, 2, 3, ], null, ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      resolve probe
+  #.........................................................................................................
+  done()
+  return null
+
+
 
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "sync; `throws` catches exception and rejects faulty matcher" ] = ( T ) ->
