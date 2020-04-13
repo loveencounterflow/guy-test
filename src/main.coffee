@@ -263,8 +263,9 @@ module.exports = ( x, settings = null ) ->
         @ok true
         echo CND.lime jr [ probe, result, null, ]
       else
-        @fail "µ73773 neq: result #{jr result}, matcher #{jr matcher}"
         # echo CND.red "#{jr [ probe, result, null, ]} #! expected result: #{jr matcher}"echo CND.red "#{jr [ probe, result, null, ]}"
+        echo CND.red "#{jr [ probe, result, null, ]}"
+        @fail "µ73773 neq: result #{jr result}, matcher #{jr matcher}"
       return result
 
     #-------------------------------------------------------------------------------------------------------

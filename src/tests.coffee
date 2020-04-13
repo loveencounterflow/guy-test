@@ -119,9 +119,12 @@ META[ "sync; calling `T.fail`, but proceeding with a successful test" ] = ( T ) 
     [ null, null, null, ]
     [ undefined, undefined, null, ]
     [ [ 1, 2, 3, ], [ 1, 2, 3, ], null, ]
+    [ [ 1, 2, 3, ], [ 1, 2, 4, ], 'xxx', ]
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      if CND.equals matcher, [ 1, 2, 4, ]
+        throw new Error "xxx"
       resolve probe
   #.........................................................................................................
   done()
