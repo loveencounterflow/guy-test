@@ -26,7 +26,6 @@
   "homepage": "https://github.com/loveencounterflow/guy-test",
   "dependencies": {
     "async": "^3.2.0",
-    "cnd": "^5.3.1",
-    "diff": "^4.0.2"
+    "cnd": "^5.3.1"
   }
 }
