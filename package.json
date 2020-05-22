@@ -1,6 +1,6 @@
 {
   "name": "guy-test",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "testing module for guy, the build tool",
   "main": "lib/main.js",
   "scripts": {
