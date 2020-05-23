@@ -26,7 +26,7 @@ rpr = jr = ( P... ) ->
   return ( ( inspect x, rpr_settings ) for x in P ).join ' '
 { inspect }   = require 'util'
 rpr_settings  = { depth: Infinity, maxArrayLength: Infinity, breakLength: Infinity, compact: true, }
-
+equals        = null
 
 # #-----------------------------------------------------------------------------------------------------------
 # diff = ( a, b ) ->
@@ -153,8 +153,9 @@ module.exports = ( x, settings = null ) ->
       for testing as (1) Node's `assert` distinguishes—unnecessarily—between shallow and deep equality, and,
       worse, [`assert.equal` and `assert.deepEqual` are broken](https://github.com/joyent/node/issues/7161),
       as they use JavaScript's broken `==` equality operator instead of `===`. ###
+      equals ?= ( new ( require 'intertype' ).Intertype() ).export().equals
       stats[ 'check-count' ] += 1
-      if CND.equals P...
+      if equals P...
         RH.on_success()
       else
         # if P.length is 2 # and ( CND.isa_text p0 = P[ 0 ] ) and ( CND.isa_text p1 = P[ 1 ] )
@@ -241,7 +242,8 @@ module.exports = ( x, settings = null ) ->
         when 4 then null
         else throw new Error "µ69338 expected 3 or 4 arguments, got #{arity}"
       throw new Error "µ70103 expected a function, got a #{CND.type_of method}" unless is_callable method
-      message_re = new RegExp error_pattern if error_pattern?
+      equals     ?= ( new ( require 'intertype' ).Intertype() ).export().equals
+      message_re  = new RegExp error_pattern if error_pattern?
       try
         result = await method()
       catch error
@@ -259,7 +261,7 @@ module.exports = ( x, settings = null ) ->
       if error_pattern?
         echo CND.MAGENTA "#{jr [ probe, result, null, ]} #! expected error: #{jr error_pattern}"
         @fail "µ73163 expected error, obtained result #{jr result}"
-      else if CND.equals result, matcher
+      else if equals result, matcher
         @ok true
         echo CND.lime jr [ probe, result, null, ]
       else

@@ -15,7 +15,7 @@ urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
 test                      = require './main'
-
+equals                    = null
 
 #-----------------------------------------------------------------------------------------------------------
 read_file = ( route, handler ) ->
@@ -114,6 +114,7 @@ META[ "sync; calling `T.fail`, but proceeding with a successful test" ] = ( T ) 
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "demo" ] = ( T, done ) ->
+  equals ?= ( new ( require 'intertype' ).Intertype() ).export().equals
   probes_and_matchers = [
     [ 1, 1, null, ]
     [ null, null, null, ]
@@ -123,7 +124,7 @@ META[ "sync; calling `T.fail`, but proceeding with a successful test" ] = ( T ) 
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      if CND.equals matcher, [ 1, 2, 4, ]
+      if equals matcher, [ 1, 2, 4, ]
         throw new Error "xxx"
       resolve probe
   #.........................................................................................................
