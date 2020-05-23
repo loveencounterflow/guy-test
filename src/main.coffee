@@ -19,14 +19,22 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 ASYNC                     = require 'async'
 # DIFF                      = require 'diff'
-is_callable               = ( x ) -> ( Object::toString.call x ) in [ '[object Function]', '[object AsyncFunction]', ]
 # { jr }                    = CND
 #-----------------------------------------------------------------------------------------------------------
 rpr = jr = ( P... ) ->
   return ( ( inspect x, rpr_settings ) for x in P ).join ' '
 { inspect }   = require 'util'
 rpr_settings  = { depth: Infinity, maxArrayLength: Infinity, breakLength: Infinity, compact: true, }
-equals        = null
+#-----------------------------------------------------------------------------------------------------------
+INTERTYPE                 = require 'intertype'
+intertype                 = new INTERTYPE.Intertype()
+{ isa
+  validate
+  type_of
+  size_of
+  equals
+  all_keys_of }           = intertype.export()
+is_callable               = ( x ) -> ( type_of x ) in [ 'function', 'asyncfunction', ]
 
 # #-----------------------------------------------------------------------------------------------------------
 # diff = ( a, b ) ->
@@ -204,7 +212,7 @@ module.exports = ( x, settings = null ) ->
 
     #-------------------------------------------------------------------------------------------------------
     T.test_error = ( test, error ) ->
-      switch type = CND.type_of test
+      switch type = type_of test
         when 'text'     then return @eq error?[ 'message' ], test
         when 'regex'    then return @ok test.test error?[ 'message' ]
         when 'function' then return @ok test error
@@ -241,7 +249,7 @@ module.exports = ( x, settings = null ) ->
         when 3 then [ probe, matcher, error_pattern, method, ] = [ probe, matcher, null, error_pattern, ]
         when 4 then null
         else throw new Error "µ69338 expected 3 or 4 arguments, got #{arity}"
-      throw new Error "µ70103 expected a function, got a #{CND.type_of method}" unless is_callable method
+      throw new Error "µ70103 expected a function, got a #{type_of method}" unless is_callable method
       equals     ?= ( new ( require 'intertype' ).Intertype() ).export().equals
       message_re  = new RegExp error_pattern if error_pattern?
       try
