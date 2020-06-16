@@ -175,7 +175,8 @@ module.exports = ( x, settings = null ) ->
         #   #{CND.yellow  rpr P[ 1 ]}
         #   """
         # else
-        message = "not equal: #{( rpr p for p in P ).join ', '}"
+        rpr_p = ( rpr p for p in P ).join '\n'
+        message = "not equal:\n#{rpr_p}"
         RH.on_error   1, yes, new Error message
 
     #-------------------------------------------------------------------------------------------------------
