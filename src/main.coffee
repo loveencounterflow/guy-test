@@ -1,4 +1,5 @@
 
+'use strict'
 
 
 ############################################################################################################
@@ -35,44 +36,15 @@ intertype                 = new INTERTYPE.Intertype()
   equals
   all_keys_of }           = intertype.export()
 is_callable               = ( x ) -> ( type_of x ) in [ 'function', 'asyncfunction', ]
+xdebug                    = ( P... ) -> debug ( CND.reverse P[ 0 ] ), P[ 1 .. ]...
 
-# #-----------------------------------------------------------------------------------------------------------
-# diff = ( a, b ) ->
-#   parts = []
-#   for part in DIFF.diffChars a, b
-#     color = if part.added then 'green' else ( if part.removed then 'red' else 'white' )
-#     parts.push CND[ color ] part.value
-#   return parts.join ''
-
-
-
-# #===========================================================================================================
-# # TIMEOUT KEEPER
-# #-----------------------------------------------------------------------------------------------------------
-# call_with_timeout = ( timeout, test_name, method, P..., handler ) ->
-#   keeper_id = null
-#   #.........................................................................................................
-#   keeper = ->
-#     # clearTimeout keeper_id
-#     keeper_id = null
-#     warn "(test: #{rpr test_name}) timeout reached; proceeding with error"
-#     handler new Error "µ64748 sorry, timeout reached (#{rpr timeout}ms)"
-#   #.........................................................................................................
-#   keeper_id = setTimeout keeper, timeout
-#   #.........................................................................................................
-#   method P..., ( P1... ) ->
-#     if keeper_id?
-#       clearTimeout keeper_id
-#       keeper_id = null
-#       # help "(test: #{rpr test_name}) timeout cancelled; proceeding as planned"
-#       return handler P1...
-#     whisper "(test: #{rpr test_name}) timeout already reached; ignoring"
-
+xdebug ('^guy-test@45648-1^')
 
 #===========================================================================================================
 # TEST RUNNER
 #-----------------------------------------------------------------------------------------------------------
 module.exports = ( x, settings = null ) ->
+  xdebug ('^guy-test@45648-2^')
   ### TAINT should accept a handler in case testing contains asynchronous functions ###
   ### Timeout for asynchronous operations: ###
   settings               ?= {}
@@ -85,6 +57,7 @@ module.exports = ( x, settings = null ) ->
     'pass-count':   0
     'fail-count':   0
     'failures':     {}
+  xdebug ('^guy-test@45648-3^')
 
 
   #=========================================================================================================
@@ -92,7 +65,7 @@ module.exports = ( x, settings = null ) ->
   #---------------------------------------------------------------------------------------------------------
   new_result_handler_and_tester = ( test_name ) ->
     RH        = { 'name': test_name, }
-    T         = { 'name': test_name, }
+    T         = { 'name': test_name, _halt_on_error: false, }
     keeper_id = null
 
     #=======================================================================================================
@@ -139,12 +112,16 @@ module.exports = ( x, settings = null ) ->
 
     #-------------------------------------------------------------------------------------------------------
     RH.on_error = ( delta, checked, error ) ->
+      xdebug ('^guy-test@45648-4^')
+      xdebug ('^guy-test@45648-5^'), T._halt_on_error
+      throw error if T._halt_on_error
       # @clear_timeout()
       stats[ 'fail-count' ]  += +1
       delta                  += +1 unless error?
       try
         entry = CND.get_caller_info delta, error, yes
       catch
+        xdebug ('^guy-test@45648-5^'), T._halt_on_error
         throw error
       throw error unless entry?
       entry[ 'checked' ]      = checked
@@ -225,6 +202,7 @@ module.exports = ( x, settings = null ) ->
       try
         method()
       catch error
+        xdebug ('^guy-test@45648-6^')
         return @test_error test, error
       throw new Error "µ68573 expected test to fail with exception, but none was thrown"
 
@@ -234,6 +212,7 @@ module.exports = ( x, settings = null ) ->
       try
         method @
       catch error
+        xdebug ('^guy-test@45648-7^')
         # debug '©x5edC', CND.get_caller_info_stack 0, error, 100, yes
         # debug '©x5edC', CND.get_caller_info 0, error, yes
         RH.on_error 0, no, error
@@ -256,6 +235,7 @@ module.exports = ( x, settings = null ) ->
       try
         result = await method()
       catch error
+        xdebug ('^guy-test@45648-8^')
         # throw error
         if message_re? and ( message_re.test error.message )
           echo CND.green jr [ probe, null, error_pattern, ]
@@ -280,16 +260,22 @@ module.exports = ( x, settings = null ) ->
       return result
 
     #-------------------------------------------------------------------------------------------------------
+    T.halt_on_error = -> @_halt_on_error = true
+
+    #-------------------------------------------------------------------------------------------------------
     return [ RH, T, ]
 
   #=========================================================================================================
   # TEST EXECUTION
   #---------------------------------------------------------------------------------------------------------
+  xdebug ('^guy-test@45648-9^')
   run = ->
     tasks = []
     x = { test: x, } if is_callable x
+    xdebug ('^guy-test@45648-10^')
     #.......................................................................................................
     for test_name, test of x
+      xdebug ('^guy-test@45648-10^'), test_name
       continue if test_name[ 0 ] is '_'
       stats[ 'test-count' ]  += 1
       test                    = test.bind x
@@ -305,10 +291,12 @@ module.exports = ( x, settings = null ) ->
           when 1
             #...............................................................................................
             tasks.push ( handler ) ->
+              xdebug ('^guy-test@45648-11^')
               whisper "started:   #{rpr test_name}"
               try
                 test T
               catch error
+                xdebug ('^guy-test@45648-12^')
                 RH.on_error 0, no, error
               whisper "completed: #{rpr test_name}"
               handler()
@@ -322,12 +310,15 @@ module.exports = ( x, settings = null ) ->
               domain = njs_domain.create()
               #.............................................................................................
               domain.on 'error', ( error ) ->
+                xdebug ('^guy-test@45648-13^')
                 RH.on_error 0, no, error
                 RH.on_completion handler
               #.............................................................................................
               domain.run ->
                 done = ( error ) ->
+                  xdebug ('^guy-test@45648-14^')
                   if error?
+                    xdebug ('^guy-test@45648-15^')
                     RH.on_error 0, no, error
                   RH.on_completion handler
                 #...........................................................................................
@@ -335,6 +326,7 @@ module.exports = ( x, settings = null ) ->
                   RH.call_with_timeout settings[ 'timeout' ], test, T, done
                 #...........................................................................................
                 catch error
+                  xdebug ('^guy-test@45648-16^')
                   RH.on_error 0, no, error
                   RH.on_completion handler
 
@@ -372,6 +364,7 @@ module.exports = ( x, settings = null ) ->
     process.exit fail_count
 
   #---------------------------------------------------------------------------------------------------------
+  xdebug ('^guy-test@45648-17^')
   run()
 
 
