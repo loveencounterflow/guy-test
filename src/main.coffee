@@ -49,7 +49,7 @@ module.exports = ( x, settings = null ) ->
   ### TAINT should accept a handler in case testing contains asynchronous functions ###
   ### Timeout for asynchronous operations: ###
   settings               ?= {}
-  settings[ 'timeout'   ]?= 1000
+  settings[ 'timeout'   ]?= 10e3
   #.........................................................................................................
   stats =
     'test-count':   0
