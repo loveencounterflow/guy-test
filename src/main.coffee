@@ -37,6 +37,7 @@ intertype                 = new INTERTYPE.Intertype()
   all_keys_of }           = intertype.export()
 is_callable               = ( x ) -> ( type_of x ) in [ 'function', 'asyncfunction', ]
 xdebug                    = ( P... ) -> debug ( CND.reverse P[ 0 ] ), P[ 1 .. ]...
+xdebug                    = ->
 
 xdebug ('^guy-test@45648-1^')
 
