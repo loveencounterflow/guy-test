@@ -251,15 +251,18 @@ module.exports = ( x, settings = null ) ->
       if error_pattern?
         echo CND.MAGENTA "#{jr [ probe, result, null, ]} #! expected error: #{jr error_pattern}"
         @fail "µ73163 expected error, obtained result #{jr result}"
-      else if equals result, matcher
-        @ok true
-        echo CND.lime jr [ probe, result, null, ]
       else
-        # echo CND.red "#{jr [ probe, result, null, ]} #! expected result: #{jr matcher}"echo CND.red "#{jr [ probe, result, null, ]}"
-        echo CND.red "#{jr [ probe, result, null, ]}"
-        @fail """µ73773 neq:
-          result:  #{jr result}
-          matcher: #{jr matcher}"""
+        xdebug ('^guy-test@45648-10^')
+        xdebug ('^guy-test@45648-10^'), { result, matcher, }, equals result, matcher
+        if equals result, matcher
+          @ok true
+          echo CND.lime jr [ probe, result, null, ]
+        else
+          # echo CND.red "#{jr [ probe, result, null, ]} #! expected result: #{jr matcher}"echo CND.red "#{jr [ probe, result, null, ]}"
+          echo CND.red "#{jr [ probe, result, null, ]}"
+          @fail """µ73773 neq:
+            result:  #{jr result}
+            matcher: #{jr matcher}"""
       return result
 
     #-------------------------------------------------------------------------------------------------------
@@ -271,14 +274,14 @@ module.exports = ( x, settings = null ) ->
   #=========================================================================================================
   # TEST EXECUTION
   #---------------------------------------------------------------------------------------------------------
-  xdebug ('^guy-test@45648-10^')
+  xdebug ('^guy-test@45648-11^')
   run = ->
     tasks = []
     x = { test: x, } if is_callable x
-    xdebug ('^guy-test@45648-11^')
+    xdebug ('^guy-test@45648-12^')
     #.......................................................................................................
     for test_name, test of x
-      xdebug ('^guy-test@45648-12^'), test_name
+      xdebug ('^guy-test@45648-13^'), test_name
       continue if test_name[ 0 ] is '_'
       stats[ 'test-count' ]  += 1
       test                    = test.bind x
@@ -294,12 +297,12 @@ module.exports = ( x, settings = null ) ->
           when 1
             #...............................................................................................
             tasks.push ( handler ) ->
-              xdebug ('^guy-test@45648-13^')
+              xdebug ('^guy-test@45648-14^')
               whisper "started:   #{rpr test_name}"
               try
                 test T
               catch error
-                xdebug ('^guy-test@45648-14^')
+                xdebug ('^guy-test@45648-15^')
                 RH.on_error 0, no, error
               whisper "completed: #{rpr test_name}"
               handler()
@@ -313,15 +316,15 @@ module.exports = ( x, settings = null ) ->
               domain = njs_domain.create()
               #.............................................................................................
               domain.on 'error', ( error ) ->
-                xdebug ('^guy-test@45648-15^')
+                xdebug ('^guy-test@45648-16^')
                 RH.on_error 0, no, error
                 RH.on_completion handler
               #.............................................................................................
               domain.run ->
                 done = ( error ) ->
-                  xdebug ('^guy-test@45648-16^')
+                  xdebug ('^guy-test@45648-17^')
                   if error?
-                    xdebug ('^guy-test@45648-17^')
+                    xdebug ('^guy-test@45648-18^')
                     RH.on_error 0, no, error
                   RH.on_completion handler
                 #...........................................................................................
@@ -329,7 +332,7 @@ module.exports = ( x, settings = null ) ->
                   RH.call_with_timeout settings[ 'timeout' ], test, T, done
                 #...........................................................................................
                 catch error
-                  xdebug ('^guy-test@45648-18^')
+                  xdebug ('^guy-test@45648-19^')
                   RH.on_error 0, no, error
                   RH.on_completion handler
 
@@ -367,7 +370,7 @@ module.exports = ( x, settings = null ) ->
     process.exit fail_count
 
   #---------------------------------------------------------------------------------------------------------
-  xdebug ('^guy-test@45648-19^')
+  xdebug ('^guy-test@45648-20^')
   run()
 
 
