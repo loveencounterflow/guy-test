@@ -27,14 +27,9 @@ rpr = jr = ( P... ) ->
 { inspect }   = require 'util'
 rpr_settings  = { depth: Infinity, maxArrayLength: Infinity, breakLength: Infinity, compact: true, }
 #-----------------------------------------------------------------------------------------------------------
-INTERTYPE                 = require 'intertype'
-intertype                 = new INTERTYPE.Intertype()
-{ isa
-  validate
-  type_of
-  size_of
-  equals
-  all_keys_of }           = intertype.export()
+types                     = new ( require 'intertype' ).Intertype()
+{ type_of
+  equals      }           = types
 is_callable               = ( x ) -> ( type_of x ) in [ 'function', 'asyncfunction', ]
 xdebug                    = ( P... ) -> debug ( CND.reverse P[ 0 ] ), P[ 1 .. ]...
 xdebug                    = ->
@@ -135,24 +130,20 @@ module.exports = ( x, settings = null ) ->
     # CHECKS
     #-------------------------------------------------------------------------------------------------------
     T.eq = ( P... ) ->
-      ### Tests whether all arguments are pairwise and deeply equal. Uses CoffeeNode Bits'n'Pieces' `equal`
-      for testing as (1) Node's `assert` distinguishes—unnecessarily—between shallow and deep equality, and,
-      worse, [`assert.equal` and `assert.deepEqual` are broken](https://github.com/joyent/node/issues/7161),
-      as they use JavaScript's broken `==` equality operator instead of `===`. ###
-      equals ?= ( new ( require 'intertype' ).Intertype() ).export().equals
       stats[ 'check-count' ] += 1
       if equals P...
         RH.on_success()
       else
-        # if P.length is 2 # and ( CND.isa_text p0 = P[ 0 ] ) and ( CND.isa_text p1 = P[ 1 ] )
-        #   info "string diff:"
-        #   info diff ( rpr P[ 0 ] ), ( rpr P[ 1 ] )
-        #   message = """
-        #   not equal:
-        #   #{CND.white   rpr P[ 0 ]}
-        #   #{CND.yellow  rpr P[ 1 ]}
-        #   """
-        # else
+        rpr_p = ( rpr p for p in P ).join '\n'
+        message = "not equal:\n#{rpr_p}"
+        RH.on_error   1, yes, new Error message
+
+    #-------------------------------------------------------------------------------------------------------
+    T.noteq = ( P... ) ->
+      stats[ 'check-count' ] += 1
+      unless equals P...
+        RH.on_success()
+      else
         rpr_p = ( rpr p for p in P ).join '\n'
         message = "not equal:\n#{rpr_p}"
         RH.on_error   1, yes, new Error message
@@ -231,7 +222,6 @@ module.exports = ( x, settings = null ) ->
         when 4 then null
         else throw new Error "µ69338 expected 3 or 4 arguments, got #{arity}"
       throw new Error "µ70103 expected a function, got a #{type_of method}" unless is_callable method
-      equals     ?= ( new ( require 'intertype' ).Intertype() ).export().equals
       message_re  = new RegExp error_pattern if error_pattern?
       try
         result = await method()

@@ -15,7 +15,7 @@ urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
 test                      = require './main'
-equals                    = null
+{ equals }                = new ( require 'intertype' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
 read_file = ( route, handler ) ->
@@ -114,7 +114,6 @@ META[ "sync; calling `T.fail`, but proceeding with a successful test" ] = ( T ) 
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "demo" ] = ( T, done ) ->
-  equals ?= ( new ( require 'intertype' ).Intertype() ).export().equals
   probes_and_matchers = [
     [ 1, 1, null, ]
     [ null, null, null, ]
@@ -250,6 +249,17 @@ META[ "sync; calling `T.fail`, but proceeding with a successful test" ] = ( T ) 
 # #     T.fail "i'm not pleased"
 # #     ### must still call done at some point: ###
 # #     done()
+
+#-----------------------------------------------------------------------------------------------------------
+@has_function_noteq = ( T, done ) ->
+  T?.eq ( Object::toString.call T.noteq ), '[object Function]'
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@distinguishes_positive_and_negative_zeros = ( T, done ) ->
+  T?.noteq +0, -0
+  done()
+
 
 ############################################################################################################
 unless module.parent?
