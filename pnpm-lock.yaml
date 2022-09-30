@@ -3,12 +3,12 @@ lockfileVersion: 5.4
 specifiers:
   async: 3.2.4
   cnd: 9.2.3
-  intertype: 0.101.8
+  intertype: 0.101.9
 
 dependencies:
   async: 3.2.4
   cnd: 9.2.3
-  intertype: 0.101.8
+  intertype: 0.101.9
 
 packages:
 
@@ -50,8 +50,8 @@ packages:
       multimix: 5.0.0
     dev: false
 
-  /intertype/0.101.8:
-    resolution: {integrity: sha512-JYStkeAOKQknN78dk61ZPR1svgu+pBZ7VHsxT8G6/a3fZV2q9BchoixxFvqbwK1sPjPfdXZk7VHWWPpZzvE+Zw==}
+  /intertype/0.101.9:
+    resolution: {integrity: sha512-mGnufxTnG8haBVht7L5DxrZPQCKjLjIMPqHLMTBJVH+tA2bFE8ruTRLan2qOPubCpA7Yzk0FQhoQKypnVHys2A==}
     dependencies:
       guy: 11.6.0
       intertype-legacy: 7.7.1

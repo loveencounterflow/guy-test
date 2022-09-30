@@ -25,6 +25,6 @@
   "dependencies": {
     "async": "3.2.4",
     "cnd": "9.2.3",
-    "intertype": "0.101.8"
+    "intertype": "0.101.9"
   }
 }
