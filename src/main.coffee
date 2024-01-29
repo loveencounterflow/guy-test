@@ -182,6 +182,7 @@ module.exports = ( x, settings = null ) ->
 
     #-------------------------------------------------------------------------------------------------------
     T.test_error = ( test, error ) ->
+      debug '^3234^', CND.reverse CND.steel rpr error.message
       switch type = type_of test
         when 'text'     then return @eq error?[ 'message' ], test
         when 'regex'    then return @ok test.test error?[ 'message' ]
