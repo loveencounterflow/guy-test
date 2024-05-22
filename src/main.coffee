@@ -110,6 +110,8 @@ module.exports = ( x, settings = null ) ->
     RH.on_error = ( delta, checked, error ) ->
       xdebug ('^guy-test@45648-4^')
       xdebug ('^guy-test@45648-5^'), T._halt_on_error
+      # for line in error.stack.split /\n/
+      #   warn '^guy-test@45648-6^', line if /intertype/.test line
       throw error if T._halt_on_error
       # @clear_timeout()
       stats[ 'fail-count' ]  += +1
@@ -117,7 +119,7 @@ module.exports = ( x, settings = null ) ->
       try
         entry = CND.get_caller_info delta, error, yes
       catch
-        xdebug ('^guy-test@45648-6^'), T._halt_on_error
+        xdebug ('^guy-test@45648-7^'), T._halt_on_error
         throw error
       throw error unless entry?
       entry[ 'checked' ]      = checked
@@ -195,7 +197,7 @@ module.exports = ( x, settings = null ) ->
       try
         method()
       catch error
-        xdebug ('^guy-test@45648-7^')
+        xdebug ('^guy-test@45648-8^')
         return @test_error test, error
       throw new Error "µ68573 expected test to fail with exception, but none was thrown"
 
@@ -205,7 +207,7 @@ module.exports = ( x, settings = null ) ->
       try
         method @
       catch error
-        xdebug ('^guy-test@45648-8^')
+        xdebug ('^guy-test@45648-9^')
         # debug '©x5edC', CND.get_caller_info_stack 0, error, 100, yes
         # debug '©x5edC', CND.get_caller_info 0, error, yes
         RH.on_error 0, no, error
@@ -227,7 +229,7 @@ module.exports = ( x, settings = null ) ->
       try
         result = await method()
       catch error
-        xdebug ('^guy-test@45648-9^')
+        xdebug ('^guy-test@45648-10^')
         # throw error
         if message_re? and ( message_re.test error.message )
           echo CND.green jr [ probe, null, error_pattern, ]
@@ -243,8 +245,8 @@ module.exports = ( x, settings = null ) ->
         echo CND.MAGENTA "#{jr [ probe, result, null, ]} #! expected error: #{jr error_pattern}"
         @fail "µ73163 expected error, obtained result #{jr result}"
       else
-        xdebug ('^guy-test@45648-10^')
-        xdebug ('^guy-test@45648-10^'), { result, matcher, }, equals result, matcher
+        xdebug ('^guy-test@45648-11^')
+        xdebug ('^guy-test@45648-12^'), { result, matcher, }, equals result, matcher
         if equals result, matcher
           @ok true
           echo CND.lime jr [ probe, result, null, ]
@@ -265,14 +267,14 @@ module.exports = ( x, settings = null ) ->
   #=========================================================================================================
   # TEST EXECUTION
   #---------------------------------------------------------------------------------------------------------
-  xdebug ('^guy-test@45648-11^')
+  xdebug ('^guy-test@45648-13^')
   run = ->
     tasks = []
     x = { test: x, } if is_callable x
-    xdebug ('^guy-test@45648-12^')
+    xdebug ('^guy-test@45648-14^')
     #.......................................................................................................
     for test_name, test of x
-      xdebug ('^guy-test@45648-13^'), test_name
+      xdebug ('^guy-test@45648-15^'), test_name
       continue if test_name[ 0 ] is '_'
       stats[ 'test-count' ]  += 1
       test                    = test.bind x
@@ -288,12 +290,12 @@ module.exports = ( x, settings = null ) ->
           when 1
             #...............................................................................................
             tasks.push ( handler ) ->
-              xdebug ('^guy-test@45648-14^')
+              xdebug ('^guy-test@45648-16^')
               whisper "started:   #{rpr test_name}"
               try
                 test T
               catch error
-                xdebug ('^guy-test@45648-15^')
+                xdebug ('^guy-test@45648-17^')
                 RH.on_error 0, no, error
               whisper "completed: #{rpr test_name}"
               handler()
@@ -307,15 +309,15 @@ module.exports = ( x, settings = null ) ->
               domain = njs_domain.create()
               #.............................................................................................
               domain.on 'error', ( error ) ->
-                xdebug ('^guy-test@45648-16^')
+                xdebug ('^guy-test@45648-18^')
                 RH.on_error 0, no, error
                 RH.on_completion handler
               #.............................................................................................
               domain.run ->
                 done = ( error ) ->
-                  xdebug ('^guy-test@45648-17^')
+                  xdebug ('^guy-test@45648-19^')
                   if error?
-                    xdebug ('^guy-test@45648-18^')
+                    xdebug ('^guy-test@45648-20^')
                     RH.on_error 0, no, error
                   RH.on_completion handler
                 #...........................................................................................
@@ -323,7 +325,7 @@ module.exports = ( x, settings = null ) ->
                   RH.call_with_timeout settings[ 'timeout' ], test, T, done
                 #...........................................................................................
                 catch error
-                  xdebug ('^guy-test@45648-19^')
+                  xdebug ('^guy-test@45648-21^')
                   RH.on_error 0, no, error
                   RH.on_completion handler
 
@@ -361,7 +363,7 @@ module.exports = ( x, settings = null ) ->
     process.exit fail_count
 
   #---------------------------------------------------------------------------------------------------------
-  xdebug ('^guy-test@45648-20^')
+  xdebug ('^guy-test@45648-22^')
   run()
 
 
