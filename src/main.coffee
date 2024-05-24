@@ -99,21 +99,21 @@ class Test
             @_test_inner property
         #...................................................................................................
         else
-          @_increment_fails 'test', 'Ωgt___1'
-          warn 'Ωgt___2', reverse " expected a test, got a #{type_of candidate} "
+          @_increment_fails 'test', 'Ωgt__10'
+          warn 'Ωgt__11', reverse " expected a test, got a #{type_of candidate} "
     #.......................................................................................................
     return null
 
   #---------------------------------------------------------------------------------------------------------
   _test_async: ( tests... ) ->
-    throw new Error "Ωgt___6 not implemented"
+    throw new Error "Ωgt__12 not implemented"
     for test in tests
       switch true
         when isa.function test
           @test test
         # when isa.object test then null
         ### TAINT record failure and move on ###
-        else throw new Error "Ωgt___7 expected a test, got a #{type_of test}"
+        else throw new Error "Ωgt__13 expected a test, got a #{type_of test}"
         # when isa.asyncfunction test then null
 
   #---------------------------------------------------------------------------------------------------------
@@ -222,7 +222,7 @@ class Test
       * failure otherwise
 
     ###
-    throw new Error "Ωgt___8 test method should be named, got #{rpr f}" if ( ref = f.name ) is ''
+    throw new Error "Ωgt__15 test method should be named, got #{rpr f}" if ( ref = f.name ) is ''
     ### TAINT check whether `f` is `asyncfunction`? ###
     error = null
     #.......................................................................................................
@@ -232,27 +232,27 @@ class Test
     catch error
       #.....................................................................................................
       unless matcher?
-        help "#{ref} ◀ Ωgt___9 error OK     ", reverse error.message
+        help "#{ref} ◀ Ωgt__16 error OK     ", reverse error.message
         T?.ok true
         return null
       #.....................................................................................................
       switch matcher_type = @_match_error error, matcher
         when true
-          help "#{ref} ◀ Ωgt__10 error OK     ", reverse error.message
+          help "#{ref} ◀ Ωgt__17 error OK     ", reverse error.message
           T?.ok true
         when false
-          urge "#{ref} ◀ Ωgt__11 error        ", reverse error.message
-          warn "#{ref} ◀ Ωgt__12 doesn't match", reverse rpr matcher
-          T?.fail "#{ref} ◀ Ωgt__13 error #{rpr error.message} doesn't match #{rpr matcher}"
+          urge "#{ref} ◀ Ωgt__18 error        ", reverse error.message
+          warn "#{ref} ◀ Ωgt__19 doesn't match", reverse rpr matcher
+          T?.fail "#{ref} ◀ Ωgt__20 error #{rpr error.message} doesn't match #{rpr matcher}"
         else
           message = "expected a regex or a text for matcher, got a #{matcher_type}"
-          warn "#{ref} ◀ Ωgt__14", reverse message
-          T?.fail "#{ref} ◀ Ωgt__15 #{message}"
+          warn "#{ref} ◀ Ωgt__21", reverse message
+          T?.fail "#{ref} ◀ Ωgt__22 #{message}"
     #.......................................................................................................
     unless error?
       message = "expected an error but none was thrown, instead got result #{rpr result}"
-      warn "#{ref} ◀ Ωgt__16", reverse message
-      T?.fail "#{ref} ◀ Ωgt__17 #{message}"
+      warn "#{ref} ◀ Ωgt__23", reverse message
+      T?.fail "#{ref} ◀ Ωgt__24 #{message}"
     #.......................................................................................................
     return null
 
