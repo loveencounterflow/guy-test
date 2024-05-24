@@ -69,6 +69,7 @@ class Test
     hide @, 'equals',       nameit 'equals',        ( P... ) =>       @_equals        P...
     hide @, '_test_ref',                            null
     hide @, 'stats',                                { '*': @totals, }
+    hide @, 'warnings',                             {}
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
@@ -137,6 +138,12 @@ class Test
     return null
 
   #---------------------------------------------------------------------------------------------------------
+  _warn: ( ref, message ) ->
+    debug 'Ωgt__14', { ref, message}
+    ( @warnings[ ref ] ?= [] ).push message
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
   _ref_from_function: ( f ) ->
     R = 'anon' if ( R = f.name ) is ''
     # throw new Error "^992-1^ test method should be named, got #{rpr f}" if ( R = f.name ) is ''
@@ -149,9 +156,9 @@ class Test
     @_increment_checks 'check', ref
     #.......................................................................................................
     try ( result = f() ) catch error
-      message = "`eq2()`: ^#{ref}^ expected a result but got an an error: #{error.message}"
-      warn '^992-12^', reverse message
-      @_increment_fails 'check', ref # T?.fail "^992-13^ #{message}"
+      message = "expected a result but got an an error: #{rpr error.message}"
+      warn '^992-12^', ref, reverse " #{message} "
+      @_warn ref, message; @_increment_fails 'check', ref # T?.fail "^992-13^ #{message}"
       debug '^25235234^', { test_mode}
       if test_mode is 'throw_errors'
         throw new Error message
@@ -164,7 +171,7 @@ class Test
     else
       warn ref, ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
       warn ref, ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
-      @_increment_fails 'check', ref
+      @_warn ref, "neq"; @_increment_fails 'check', ref
       # T?.ok false
     #.......................................................................................................
     return null
