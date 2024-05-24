@@ -27,6 +27,7 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 ## To Do
 
 * **[–]** docs
+* **[–]** consider to move equality testing so its use doesn't depend on `Test` instance
 
 <!-- ## Is Done -->
 
