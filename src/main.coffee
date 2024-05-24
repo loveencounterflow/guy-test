@@ -19,55 +19,18 @@ GUY                       = require 'guy'
   log     }               = GUY.trm
 test                      = require 'guy-test'
 types                     = new ( require 'intertype' ).Intertype()
-_equals                   = require '../deps/jkroso-equals'
 # equals                    = require '/home/flow/jzr/intertype-legacy/deps/jkroso-equals.js'
 # equals                    = require '/home/flow/jzr/hengist/dev/intertype-2024-04-15/src/basics.test.coffee'
 # equals                    = require ( require 'util' ).isDeepStrictEqual
+_jkequals                 = require '../deps/jkroso-equals'
 ### TAINT these should become instance configuration ###
 test_mode                 = 'throw_failures'
 test_mode                 = 'throw_errors'
 test_mode                 = 'failsafe'
 
 
+
 #===========================================================================================================
-# IMPLEMENT SET EQUALITY
-#-----------------------------------------------------------------------------------------------------------
-_set_contains = ( set, value ) ->
-  for element from set
-    return true if equals element, value
-  return false
-
-#-----------------------------------------------------------------------------------------------------------
-equals = ( a, b ) ->
-  switch true
-    when types.isa.set a
-      return false unless types.isa.set b
-      return false unless a.size is b.size
-      for element from a
-        return false unless _set_contains b, element
-      return true
-  return _equals a, b
-
-#-----------------------------------------------------------------------------------------------------------
-test_set_equality_by_value = ->
-  echo()
-  result    = [ 1, [ 2 ], ]
-  matcher1  = [ 1, [ 2 ], ]
-  matcher2  = [ 1, [ 3 ], ]
-  debug '^810-1^', equals result, matcher1
-  debug '^810-2^', equals result, matcher2
-  echo()
-  result    = new Set [ 1, 2, ]
-  matcher1  = new Set [ 1, 2, ]
-  matcher2  = new Set [ 1, 3, ]
-  debug '^810-3^', equals result, matcher1
-  debug '^810-4^', equals result, matcher2
-  echo()
-  result    = new Set [ 1, [ 2 ], ]
-  matcher1  = new Set [ 1, [ 2 ], ]
-  matcher2  = new Set [ 1, [ 3 ], ]
-  debug '^810-5^', equals result, matcher1
-  debug '^810-6^', equals result, matcher2
 
 
 #===========================================================================================================
@@ -189,6 +152,13 @@ try_and_show = ( T, f ) ->
     warn '^992-12^', reverse message = "`try_and_show()`: expected an error but none was thrown"
     T?.fail "^992-13^ `try_and_show()`: expected an error but none was thrown"
   return null
+  #=========================================================================================================
+  # SET EQUALITY BY VALUE
+  #---------------------------------------------------------------------------------------------------------
+  _set_contains: ( set, value ) ->
+    for element from set
+      return true if @_equals element, value
+    return false
 
 #===========================================================================================================
 safeguard = ( T, f ) ->
@@ -198,7 +168,19 @@ safeguard = ( T, f ) ->
     warn '^992-14^', reverse message = "`safeguard()`: #{rpr error.message}"
     T?.fail message
   return null
+  #---------------------------------------------------------------------------------------------------------
+  _sets_are_equal: ( a, b ) ->
+    return false unless isa.set b
+    return false unless a.size is b.size
+    for element from a
+      return false unless @_set_contains b, element
+    return true
 
+  #---------------------------------------------------------------------------------------------------------
+  _equals: ( a, b ) ->
+    return false unless ( type_of a ) is ( type_of b )
+    return @_sets_are_equal a, b if isa.set a
+    return _jkequals a, b
 
 module.exports = { equals, eq2, throws2, }
 
