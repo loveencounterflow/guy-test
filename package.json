@@ -24,7 +24,6 @@
   "homepage": "https://github.com/loveencounterflow/guy-test",
   "dependencies": {
     "guy": "^13.7.2",
-    "guy-test": "^5.0.2",
     "intertype": "^202.0.0",
     "webguy": "^5.2.1"
   }
