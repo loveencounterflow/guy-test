@@ -49,6 +49,9 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 * **[–]** custom error classes
 * **[–]** provide stats per module, per method and totals
 * **[–]** include message with each fail
+* **[–]** get rid of `level` kludge in `_increment()`
+* **[–]** use proper namespacing for types
+* **[–]** remove `? {}` in `create.gt_report_cfg cfg ? {}` in `_report()` after bug fixed in InterType
 
 <!-- ## Is Done -->
 
