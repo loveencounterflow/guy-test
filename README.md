@@ -52,6 +52,7 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 * **[–]** get rid of `level` kludge in `_increment()`
 * **[–]** use proper namespacing for types
 * **[–]** remove `? {}` in `create.gt_report_cfg cfg ? {}` in `_report()` after bug fixed in InterType
+* **[–]** consolidate calls to `Test::_increment_fails()`, `warn()`, `Test::_warn()` into single call
 
 <!-- ## Is Done -->
 
