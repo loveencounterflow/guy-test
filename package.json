@@ -1,7 +1,31 @@
 {
-	"dependencies": {
-		"guy": "^13.7.2",
-		"guy-test": "^5.0.2",
-		"intertype": "^202.0.0"
-	}
+  "name": "guy-test",
+  "version": "5.0.2",
+  "description": "testing module for guy, the build tool",
+  "main": "lib/main.js",
+  "scripts": {
+    "build": "coffee --map -o lib -c src",
+    "test": "node lib/tests.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loveencounterflow/guy-test.git"
+  },
+  "keywords": [
+    "build",
+    "tool",
+    "test"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/loveencounterflow/guy-test/issues"
+  },
+  "homepage": "https://github.com/loveencounterflow/guy-test",
+  "dependencies": {
+    "guy": "^13.7.2",
+    "guy-test": "^5.0.2",
+    "intertype": "^202.0.0",
+    "webguy": "^5.2.1"
+  }
 }
