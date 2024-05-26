@@ -110,16 +110,34 @@ class Test
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _test_async: ( tests... ) ->
-    throw new Error "Ωgt___2 not implemented"
-    for test in tests
-      switch true
-        when isa.function test
-          @test test
-        # when isa.object test then null
-        ### TAINT record failure and move on ###
-        else throw new Error "Ωgt___3 expected a test, got a #{type_of test}"
-        # when isa.asyncfunction test then null
+  _async_test: ( tests... ) ->
+    await @_async_test_inner tests...
+    @report()
+    return @stats
+
+  #---------------------------------------------------------------------------------------------------------
+  _async_test_inner: ( tests... ) ->
+    for candidate in tests then switch true
+      #.....................................................................................................
+      when isa.function candidate
+        @_test_inner candidate
+      #.....................................................................................................
+      when isa.asyncfunction candidate
+        @_test_ref = @_ref_from_function candidate
+        @_increment_tests 'test', @_test_ref
+        try await candidate.call @ catch error then finally @_test_ref = null
+      #.....................................................................................................
+      when isa.object candidate
+        for key, property of candidate
+          await @_async_test_inner property
+      #.....................................................................................................
+      else
+        ref     = @_ref_from_function candidate
+        ref     = 'Ωgt___3' if ref is 'anon'
+        message = "expected a test, got a #{type_of candidate}"
+        @_increment_fails 'test', ref; warn ref, reverse " #{message} "; @_warn ref, message
+    #.......................................................................................................
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   _report: ( cfg ) ->
@@ -247,7 +265,7 @@ class Test
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _throws_async: ( T, f, matcher ) -> # new Promise ( resolve, reject ) =>
+  _async_throws: ( T, f, matcher ) -> # new Promise ( resolve, reject ) =>
     ###
 
     * needs `f` to be an `asyncfunction` (although `function` will also work? better check anyway?)
@@ -322,7 +340,8 @@ module.exports = {
   Test:         Test,
   _TMP_test:    t,
   test:         t.test,
+  async_test:   t.async_test,
   equals:       t.equals,
   eq:           t.eq,
   throws:       t.throws,
-  throws_async: t.throws_async, }
+  async_throws: t.async_throws, }
