@@ -126,6 +126,11 @@ browserify --require intertype --debug -o public/browserified/intertype.js
   both class and error message
 * **[–]** implement equality for `Map`s
 * **[–]** can tasks be nested? Does it make sense to have one task call one or more other tasks?
+* **[–]** implement instance-level and check-level configuration:
+  * `show_results`
+  * `show_fails`
+  * `show_passes`
+  * `throw_errors`
 
 <!-- ## Is Done -->
 
