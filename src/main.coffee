@@ -33,24 +33,16 @@ test_mode                 = 'failsafe'
 { isa, type_of, validate, create, } = new Intertype
   gt_stats:
     fields:
-      runs:     'cardinal'
-      checks:   'cardinal'
       passes:   'cardinal'
       fails:    'cardinal'
     template:
-      runs:     0
-      checks:   0
       passes:   0
       fails:    0
   gt_totals: ### TAINT use inheritance to derive shared fields ###
     fields:
-      tests:    'cardinal'
-      checks:   'cardinal'
       passes:   'cardinal'
       fails:    'cardinal'
     template:
-      tests:    0
-      checks:   0
       passes:   0
       fails:    0
   gt_report_cfg:
@@ -93,19 +85,26 @@ class Test
     for candidate in tests then switch true
       #.....................................................................................................
       when isa.function candidate
-        @_test_ref = @_ref_from_function candidate
-        @_increment_tests 'test', @_test_ref
-        try candidate.call @ catch error then finally @_test_ref = null
+        @_test_ref = ref = @_ref_from_function candidate
+        # @_increment_tests 'test', ref
+        try
+          candidate.call @
+        catch error
+          @fail ref, "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
+        finally @_test_ref = null
       #.....................................................................................................
       when isa.object candidate
         for key, property of candidate
           @_test_inner property
       #.....................................................................................................
+      when not candidate?
+        ref     = 'Ωgt___1'
+        @fail ref, "expected a test, got a #{type_of candidate}"
+      #.....................................................................................................
       else
         ref     = @_ref_from_function candidate
-        ref     = 'Ωgt___1' if ref is 'anon'
-        message = "expected a test, got a #{type_of candidate}"
-        @_increment_fails 'test', ref; warn ref, reverse " #{message} "; @_warn ref, message
+        ref     = 'Ωgt___2' if ref is 'anon'
+        @fail ref, "expected a test, got a #{type_of candidate}"
     #.......................................................................................................
     return null
 
@@ -124,7 +123,7 @@ class Test
       #.....................................................................................................
       when isa.asyncfunction candidate
         @_test_ref = @_ref_from_function candidate
-        @_increment_tests 'test', @_test_ref
+        # @_increment_tests 'test', @_test_ref
         try await candidate.call @ catch error then finally @_test_ref = null
       #.....................................................................................................
       when isa.object candidate
@@ -134,8 +133,7 @@ class Test
       else
         ref     = @_ref_from_function candidate
         ref     = 'Ωgt___3' if ref is 'anon'
-        message = "expected a test, got a #{type_of candidate}"
-        @_increment_fails 'test', ref; warn ref, reverse " #{message} "; @_warn ref, message
+        @fail ref, "expected a test, got a #{type_of candidate}"
     #.......................................................................................................
     return null
 
@@ -145,40 +143,59 @@ class Test
     { blue
       red
       gold    } = GUY.trm
+    line        = gold '—————————————————————————————————————————————————————————————————'
+    #.......................................................................................................
+    show_totals = =>
+      whisper 'Ωgt___8', prefix, line
+      whisper 'Ωgt___9', prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
+      whisper 'Ωgt__10', prefix, line
+      return null
+    #.......................................................................................................
     whisper()
-    whisper 'Ωgt___4', prefix, gold '—————————————————————————————————————————————————————————————————'
+    whisper 'Ωgt___4', prefix, line
     whisper 'Ωgt___5', prefix, gold '                        🙤 GUY TEST 🙦'
-    whisper 'Ωgt___6', prefix, gold '—————————————————————————————————————————————————————————————————'
+    whisper 'Ωgt___6', prefix, line
     color = if @totals.fails is 0 then 'lime' else 'red'
     for key, stats of @stats
       continue if key is '*'
       whisper 'Ωgt___7', prefix, blue ( key.padEnd 20 ), stats
-    whisper 'Ωgt___8', prefix, gold '—————————————————————————————————————————————————————————————————'
-    whisper 'Ωgt___9', prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
-    whisper 'Ωgt__10', prefix, gold '—————————————————————————————————————————————————————————————————'
+    show_totals()
+    repeat_totals = false
     for sub_ref, messages of @warnings
+      repeat_totals = true
       for message in messages
         whisper 'Ωgt__11', prefix, ( red sub_ref ), reverse red " #{message} "
-    whisper 'Ωgt__12', prefix, gold '—————————————————————————————————————————————————————————————————'
+    show_totals() if repeat_totals
     whisper()
     #.......................................................................................................
     return @stats
 
   #---------------------------------------------------------------------------------------------------------
-  _increment_tests:   ( level, check_ref ) -> @_increment level, 'tests',  check_ref
-  _increment_checks:  ( level, check_ref ) -> @_increment level, 'checks', check_ref
   _increment_passes:  ( level, check_ref ) -> @_increment level, 'passes', check_ref
   _increment_fails:   ( level, check_ref ) -> @_increment level, 'fails',  check_ref
+
+  #---------------------------------------------------------------------------------------------------------
+  pass: ( ref, message = null ) ->
+    message ?= "(no message given)"
+    @_increment_passes 'check', ref
+    help ref, reverse " #{message} "
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  fail: ( ref, message = null ) ->
+    message ?= "(no message given)"
+    @_increment_fails 'check', ref
+    @_warn ref, message
+    warn ref, reverse " #{message} "
+    return null
 
   #---------------------------------------------------------------------------------------------------------
   _increment: ( level, key, check_ref ) ->
     ### TAINT get rid of `level` kludge ###
     @totals[ key ]++
     per_test_stats  = @stats[ "#{@_test_ref}.*"             ] ?= create.gt_stats()
-    per_test_stats.runs++ if key is 'checks'
     if level is 'check'
       per_check_stats = @stats[ "#{@_test_ref}.#{check_ref}"  ] ?= create.gt_stats()
-      per_check_stats.runs++ if key is 'checks'
       unless key is 'tests'
         per_test_stats[ key ]++
         per_check_stats[ key ]++
@@ -186,7 +203,6 @@ class Test
 
   #---------------------------------------------------------------------------------------------------------
   _warn: ( ref, message ) ->
-    debug 'Ωgt__13', { ref, message}
     ( @warnings[ ref ] ?= [] ).push message
     return null
 
@@ -200,26 +216,20 @@ class Test
   #=========================================================================================================
   _eq: ( f, matcher ) ->
     ref = @_ref_from_function f
-    @_increment_checks 'check', ref
+    # @_increment_checks 'check', ref
     #.......................................................................................................
     try ( result = f() ) catch error
       message = "expected a result but got an an error: #{rpr error.message}"
-      warn '^992-12^', ref, reverse " #{message} "
-      @_warn ref, message; @_increment_fails 'check', ref # T?.fail "^992-13^ #{message}"
-      debug '^25235234^', { test_mode}
-      if test_mode is 'throw_errors'
-        throw new Error message
+      @fail ref, message
+      throw new Error message if test_mode is 'throw_errors'
     #.......................................................................................................
     if @equals result, matcher
-      help ref, "EQ OK"
-      @_increment_passes 'check', ref
-      # T?.ok true
+      @pass ref, "EQ OK"
     #.......................................................................................................
     else
       warn ref, ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
       warn ref, ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
-      @_warn ref, "neq"; @_increment_fails 'check', ref
-      # T?.ok false
+      @fail ref, "NEQ"
     #.......................................................................................................
     return null
 
