@@ -197,7 +197,7 @@ class Test
   _increment_fails:   ( level, check_ref ) -> @_increment level, 'fails',  check_ref
 
   #---------------------------------------------------------------------------------------------------------
-  _pass: ( ref, message = null ) ->
+  _pass: ( ref, cat, message = null ) ->
     message ?= "(no message given)"
     @_increment_passes 'check', ref
     help ref, reverse " #{message} "
