@@ -200,19 +200,24 @@ class Test
   _pass: ( ref, cat, message = null ) ->
     message ?= "(no message given)"
     @_increment_passes 'check', ref
-    help ref, reverse " #{message} "
+    if @cfg.show_passes
+      if message?
+        message = to_width message, @cfg.message_width
+        help ref, cat, reverse " #{message} "
+      else
+        help ref, cat
     return null
 
   #---------------------------------------------------------------------------------------------------------
   _fail: ( ref, cat, message = null ) ->
     @_increment_fails 'check', ref
-    if message?
-      @_warn ref, message
-      message = to_width message, @cfg.message_width
-      warn ref, cat, reverse " #{message} "
-    else
-      @_warn ref, cat
-      warn ref, cat
+    @_warn ref, if message? then "(#{cat}) #{message}" else cat
+    if @cfg.show_fails
+      if message?
+        message = to_width message, @cfg.message_width
+        warn ref, cat, reverse " #{message} "
+      else
+        warn ref, cat
     return null
 
   #---------------------------------------------------------------------------------------------------------
