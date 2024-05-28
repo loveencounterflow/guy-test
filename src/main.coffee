@@ -242,7 +242,6 @@ class Test
   #=========================================================================================================
   _eq: ( f, matcher ) ->
     ref = @_ref_from_function f
-    # @_increment_checks 'check', ref
     #.......................................................................................................
     try ( result = f() ) catch error
       message = "expected a result but got an an error: #{rpr error.message}"
