@@ -112,7 +112,7 @@ class Test
         try
           candidate.call @
         catch error
-          @fail ref, "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
+          @fail ref, 'error', "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
         finally @_test_ref = null
       #.....................................................................................................
       when isa.object candidate
@@ -121,12 +121,12 @@ class Test
       #.....................................................................................................
       when not candidate?
         ref     = 'Ωgt___1'
-        @fail ref, "expected a test, got a #{type_of candidate}"
+        @fail ref, 'missing', "expected a test, got a #{type_of candidate}"
       #.....................................................................................................
       else
         ref     = @_ref_from_function candidate
         ref     = 'Ωgt___2' if ref is 'anon'
-        @fail ref, "expected a test, got a #{type_of candidate}"
+        @fail ref, 'type', "expected a test, got a #{type_of candidate}"
     #.......................................................................................................
     return null
 
@@ -155,7 +155,7 @@ class Test
       else
         ref     = @_ref_from_function candidate
         ref     = 'Ωgt___3' if ref is 'anon'
-        @fail ref, "expected a test, got a #{type_of candidate}"
+        @fail ref, 'type', "expected a test, got a #{type_of candidate}"
     #.......................................................................................................
     return null
 
@@ -246,7 +246,7 @@ class Test
     #.......................................................................................................
     try ( result = f() ) catch error
       message = "expected a result but got an an error: #{rpr error.message}"
-      @fail ref, message
+      @fail "#{ref} ◀ Ωgt__12", 'error', message
       throw new Error message if test_mode is 'throw_errors'
     #.......................................................................................................
     if @equals result, matcher
