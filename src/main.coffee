@@ -149,19 +149,19 @@ class Test
     line        = gold '—————————————————————————————————————————————————————————————————'
     #.......................................................................................................
     show_totals = =>
-      whisper 'Ωgt___8', prefix, line
-      whisper 'Ωgt___9', prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
-      whisper 'Ωgt__10', prefix, line
+      whisper 'Ωgt___4', prefix, line
+      whisper 'Ωgt___5', prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
+      whisper 'Ωgt___6', prefix, line
       return null
     #.......................................................................................................
     whisper()
-    whisper 'Ωgt___4', prefix, line
-    whisper 'Ωgt___5', prefix, gold '                        🙤 GUY TEST 🙦'
-    whisper 'Ωgt___6', prefix, line
+    whisper 'Ωgt___7', prefix, line
+    whisper 'Ωgt___8', prefix, gold '                        🙤 GUY TEST 🙦'
+    whisper 'Ωgt___9', prefix, line
     color = if @totals.fails is 0 then 'lime' else 'red'
     for key, stats of @stats
       continue if key is '*'
-      whisper 'Ωgt___7', prefix, blue ( key.padEnd 20 ), stats
+      whisper 'Ωgt__10', prefix, blue ( key.padEnd 20 ), stats
     show_totals()
     repeat_totals = false
     for sub_ref, messages of @warnings
