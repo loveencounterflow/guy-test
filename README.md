@@ -125,12 +125,22 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 * **[–]** allow to pass in multiple matchers to `Test::throws()`, `Test::async_throws()` so we can check
   both class and error message
 * **[–]** implement equality for `Map`s
+* **[–]** methods `Types::pass()`, `Types::fail()` whould take three arguments `ref`, `cat` and `message`;
+  there could be an additional method `Types::fail_eq()` to display two lines with first cat `result` or
+  `error`, second cat with `doesn't match`
 * **[–]** can tasks be nested? Does it make sense to have one task call one or more other tasks?
 * **[–]** implement instance-level and check-level configuration:
-  * `show_results`
-  * `show_fails`
-  * `show_passes`
-  * `throw_errors`
+  * `auto_reset: false,`
+  * `show_report: true,`
+  * `show_results: true,`
+  * `show_fails: true,`
+  * `show_passes: true,`
+  * `throw_errors: false,`
+* **[–]** check tha three-argument style calling is used everywhere for `Test::pass()` and `Test::fail()`,
+  including in tests, docs
+* **[–]** use call to `Tests::_warn()` to also display warning when so configured
+* **[–]** introduce methods to also display ongoing messages when so configured
+* **[–]** standardize handling and display of compound refs (using dot notation or slashes)
 
 <!-- ## Is Done -->
 
