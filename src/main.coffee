@@ -29,9 +29,27 @@ test_mode                 = 'throw_errors'
 test_mode                 = 'failsafe'
 
 
-
 #===========================================================================================================
 { isa, type_of, validate, create, } = new Intertype
+  gt_message_width:
+    test:             ( x ) -> ( @isa.cardinal x ) and x > 2
+  gt_test_cfg:
+    fields:
+      auto_reset:     'boolean'
+      show_report:    'boolean'
+      show_results:   'boolean'
+      show_fails:     'boolean'
+      show_passes:    'boolean'
+      throw_errors:   'boolean'
+      message_width:  'gt_message_width'
+    template:
+      auto_reset:     false
+      show_report:    true
+      show_results:   true
+      show_fails:     true
+      show_passes:    true
+      throw_errors:   false
+      message_width:  50
   gt_stats:
     fields:
       passes:   'cardinal'
@@ -57,6 +75,7 @@ class Test
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
+    @cfg = Object.freeze create.gt_test_cfg cfg
     @totals = create.gt_totals()
     #.......................................................................................................
     hide @, 'pass',         nameit 'pass',          ( P... ) =>       @_pass          P...
