@@ -244,38 +244,32 @@ class Test
     return matcher_type
 
   #---------------------------------------------------------------------------------------------------------
-  _throws: ( T, f, matcher ) ->
     throw new Error "^992-1^ test method should be named, got #{rpr f}" if ( ref = f.name ) is ''
+  _throws: ( f, matcher ) ->
     error = null
     #.......................................................................................................
     try ( urge "^#{ref}^ `throws()` result of call:", f() ) catch error
       unless matcher?
-        help "^#{ref} ◀ throws@1^ error        ", reverse error.message
-        T?.ok true
+        @pass "#{ref} ◀ Ωgt__17", 'error ok', error.message
         return null
       #.....................................................................................................
       switch matcher_type = @_match_error error, matcher
         when true
-          help "^#{ref} ◀ throws@2^ OK           ", reverse error.message
-          T?.ok true
+          @pass "#{ref} ◀ Ωgt__18", 'error ok', error.message
         when false
-          urge "^#{ref} ◀ throws@3^ error        ", reverse error.message
-          warn "^#{ref} ◀ throws@4^ doesn't match", reverse rpr matcher
-          T?.fail "^#{ref} ◀ throws@5^ error #{rpr error.message} doesn't match #{rpr matcher}"
+          urge "^#{ref} ◀ Ωgt__19^ error        ", reverse error.message  ### TAINT to be replaced ###
+          warn "^#{ref} ◀ Ωgt__20^ doesn't match", reverse rpr matcher    ### TAINT to be replaced ###
+          @fail "#{ref} ◀ Ωgt__21", 'neq', "error #{rpr error.message} doesn't match #{rpr matcher}"
         else
-          message = "expected a regex or a text, got a #{matcher_type}"
-          warn "^#{ref} ◀ throws@6^", reverse message
-          T?.fail "^#{ref} ◀ throws@7^ #{message}"
+          @fail "#{ref} ◀ Ωgt__22", 'type', "expected a regex or a text, got a #{matcher_type}"
     #.......................................................................................................
     unless error?
-      message = "`throws()`: expected an error but none was thrown"
-      warn "^#{ref} ◀ throws@8^", reverse message
-      T?.fail "^#{ref} ◀ throws@9^ #{message}"
+      @fail "#{ref} ◀ Ωgt__23", 'noerr', "expected an error but none was thrown"
     #.......................................................................................................
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _async_throws: ( T, f, matcher ) -> # new Promise ( resolve, reject ) =>
+  _async_throws: ( f, matcher ) -> # new Promise ( resolve, reject ) =>
     ###
 
     * needs `f` to be an `asyncfunction` (although `function` will also work? better check anyway?)
@@ -296,27 +290,21 @@ class Test
     catch error
       #.....................................................................................................
       unless matcher?
-        help "#{ref} ◀ Ωgt__15 error OK     ", reverse error.message
-        T?.ok true
+        @pass "#{ref} ◀ Ωgt__24", 'error ok', "did throw #{rpr error.message}"
         return null
       #.....................................................................................................
       switch matcher_type = @_match_error error, matcher
         when true
-          help "#{ref} ◀ Ωgt__16 error OK     ", reverse error.message
-          T?.ok true
+          @pass "#{ref} ◀ Ωgt__25", 'error ok', "did throw #{rpr error.message}"
         when false
-          urge "#{ref} ◀ Ωgt__17 error        ", reverse error.message
-          warn "#{ref} ◀ Ωgt__18 doesn't match", reverse rpr matcher
-          T?.fail "#{ref} ◀ Ωgt__19 error #{rpr error.message} doesn't match #{rpr matcher}"
+          urge "#{ref} ◀ Ωgt__26 error        ", reverse error.message
+          warn "#{ref} ◀ Ωgt__27 doesn't match", reverse rpr matcher
+          @fail "#{ref} ◀ Ωgt__28", 'error nok', "did throw but not match #{rpr error.message}"
         else
-          message = "expected a regex or a text for matcher, got a #{matcher_type}"
-          warn "#{ref} ◀ Ωgt__20", reverse message
-          T?.fail "#{ref} ◀ Ωgt__21 #{message}"
+          @fail "#{ref} ◀ Ωgt__29", 'fail', "expected a regex or a text for matcher, got a #{matcher_type}"
     #.......................................................................................................
     unless error?
-      message = "expected an error but none was thrown, instead got result #{rpr result}"
-      warn "#{ref} ◀ Ωgt__22", reverse message
-      T?.fail "#{ref} ◀ Ωgt__23 #{message}"
+      @fail "#{ref} ◀ Ωgt__30", 'missing', "expected an error but none was thrown, instead got result #{rpr result}"
     #.......................................................................................................
     return null
 
