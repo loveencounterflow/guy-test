@@ -249,13 +249,11 @@ class Test
       throw new Error message if test_mode is 'throw_errors'
       return null
     #.......................................................................................................
-    if @equals result, matcher
-      @pass ref, "EQ OK"
+    return @pass "#{ref} ◀ Ωgt__13", 'eq' if @equals result, matcher
     #.......................................................................................................
-    else
-      warn ref, ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
-      warn ref, ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
-      @fail ref, "NEQ"
+    warn "#{ref} ◀ Ωgt__14", ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
+    warn "#{ref} ◀ Ωgt__15", ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
+    @fail "#{ref} ◀ Ωgt__16", 'neq'
     #.......................................................................................................
     return null
 
