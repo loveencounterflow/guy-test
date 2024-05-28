@@ -22,6 +22,7 @@ _jkequals                 = require '../deps/jkroso-equals'
 { hide }                  = GUY.props
 WG                        = require 'webguy'
 { nameit }                = WG.props
+{ to_width }              = require 'to-width'
 ### TAINT these should become instance configuration ###
 test_mode                 = 'throw_failures'
 test_mode                 = 'throw_errors'
@@ -58,6 +59,8 @@ class Test
   constructor: ( cfg ) ->
     @totals = create.gt_totals()
     #.......................................................................................................
+    hide @, 'pass',         nameit 'pass',          ( P... ) =>       @_pass          P...
+    hide @, 'fail',         nameit 'fail',          ( P... ) =>       @_fail          P...
     hide @, 'test',         nameit 'test',          ( P... ) =>       @_test          P...
     hide @, 'report',       nameit 'report',        ( P... ) =>       @_report        P...
     hide @, 'eq',           nameit 'eq',            ( P... ) =>       @_eq            P...
@@ -182,11 +185,15 @@ class Test
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  fail: ( ref, message = null ) ->
-    message ?= "(no message given)"
+  _fail: ( ref, cat, message = null ) ->
     @_increment_fails 'check', ref
-    @_warn ref, message
-    warn ref, reverse " #{message} "
+    if message?
+      @_warn ref, message
+      message = to_width message, @cfg.message_width
+      warn ref, cat, reverse " #{message} "
+    else
+      @_warn ref, cat
+      warn ref, cat
     return null
 
   #---------------------------------------------------------------------------------------------------------
