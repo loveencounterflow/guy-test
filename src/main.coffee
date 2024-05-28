@@ -42,6 +42,7 @@ test_mode                 = 'failsafe'
       show_passes:    'boolean'
       throw_errors:   'boolean'
       message_width:  'gt_message_width'
+      prefix:         'text'
     template:
       auto_reset:     false
       show_report:    true
@@ -50,6 +51,7 @@ test_mode                 = 'failsafe'
       show_passes:    true
       throw_errors:   false
       message_width:  50
+      prefix:         ''
   gt_stats:
     fields:
       passes:   'cardinal'
@@ -64,11 +66,12 @@ test_mode                 = 'failsafe'
     template:
       passes:   0
       fails:    0
-  gt_report_cfg:
-    fields:
-      prefix:   'text'
-    template:
-      prefix:   ''
+  # gt_report_cfg:
+  #   fields:
+  #     prefix:   'text'
+  #   template:
+  #     prefix:   ''
+
 
 #===========================================================================================================
 class Test
@@ -160,33 +163,32 @@ class Test
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _report: ( cfg ) ->
-    { prefix  } = create.gt_report_cfg cfg ? {}
+  _report: ->
     { blue
       red
       gold    } = GUY.trm
     line        = gold '—————————————————————————————————————————————————————————————————'
     #.......................................................................................................
     show_totals = =>
-      whisper 'Ωgt___4', prefix, line
-      whisper 'Ωgt___5', prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
-      whisper 'Ωgt___6', prefix, line
+      whisper 'Ωgt___4 ' + @cfg.prefix, line
+      whisper 'Ωgt___5 ' + @cfg.prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
+      whisper 'Ωgt___6 ' + @cfg.prefix, line
       return null
     #.......................................................................................................
     whisper()
-    whisper 'Ωgt___7', prefix, line
-    whisper 'Ωgt___8', prefix, gold '                        🙤 GUY TEST 🙦'
-    whisper 'Ωgt___9', prefix, line
+    whisper 'Ωgt___7 ' + @cfg.prefix, line
+    whisper 'Ωgt___8 ' + @cfg.prefix, gold '                        🙤 GUY TEST 🙦'
+    whisper 'Ωgt___9 ' + @cfg.prefix, line
     color = if @totals.fails is 0 then 'lime' else 'red'
     for key, stats of @stats
       continue if key is '*'
-      whisper 'Ωgt__10', prefix, blue ( key.padEnd 20 ), stats
+      whisper 'Ωgt__10 ' + @cfg.prefix, blue ( key.padEnd 20 ), stats
     show_totals()
     repeat_totals = false
     for sub_ref, messages of @warnings
       repeat_totals = true
       for message in messages
-        whisper 'Ωgt__11', prefix, ( red sub_ref ), reverse red " #{message} "
+        whisper 'Ωgt__11 ' + @cfg.prefix, ( red sub_ref ), reverse red " #{message} "
     show_totals() if repeat_totals
     whisper()
     #.......................................................................................................
