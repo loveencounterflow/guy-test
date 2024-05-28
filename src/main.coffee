@@ -211,6 +211,7 @@ class Test
   #---------------------------------------------------------------------------------------------------------
   _fail: ( ref, cat, message = null ) ->
     @_increment_fails 'check', ref
+    ref = "#{@_test_ref}.#{ref}"
     @_warn ref, if message? then "(#{cat}) #{message}" else cat
     if @cfg.show_fails
       if message?
@@ -250,15 +251,15 @@ class Test
     #.......................................................................................................
     try ( result = f() ) catch error
       message = "expected a result but got an an error: #{rpr error.message}"
-      @fail "#{ref} ◀ Ωgt__12", 'error', message
+      @fail "#{ref}.Ωgt__12", 'error', message
       throw new Error message if test_mode is 'throw_errors'
       return null
     #.......................................................................................................
-    return @pass "#{ref} ◀ Ωgt__13", 'eq' if @equals result, matcher
+    return @pass "#{ref}.Ωgt__13", 'eq' if @equals result, matcher
     #.......................................................................................................
-    warn "#{ref} ◀ Ωgt__14", ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
-    warn "#{ref} ◀ Ωgt__15", ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
-    @fail "#{ref} ◀ Ωgt__16", 'neq'
+    warn "#{ref}.Ωgt__14", ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
+    warn "#{ref}.Ωgt__15", ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
+    @fail "#{ref}.Ωgt__16", 'neq'
     #.......................................................................................................
     return null
 
@@ -279,21 +280,21 @@ class Test
     #.......................................................................................................
     try ( urge "^#{ref}^ `throws()` result of call:", f() ) catch error
       unless matcher?
-        @pass "#{ref} ◀ Ωgt__17", 'error ok', error.message
+        @pass "#{ref}.Ωgt__17", 'error ok', error.message
         return null
       #.....................................................................................................
       switch matcher_type = @_match_error error, matcher
         when true
-          @pass "#{ref} ◀ Ωgt__18", 'error ok', error.message
+          @pass "#{ref}.Ωgt__18", 'error ok', error.message
         when false
-          urge "^#{ref} ◀ Ωgt__19^ error        ", reverse error.message  ### TAINT to be replaced ###
-          warn "^#{ref} ◀ Ωgt__20^ doesn't match", reverse rpr matcher    ### TAINT to be replaced ###
-          @fail "#{ref} ◀ Ωgt__21", 'neq', "error #{rpr error.message} doesn't match #{rpr matcher}"
+          urge "^#{ref}.Ωgt__19^ error        ", reverse error.message  ### TAINT to be replaced ###
+          warn "^#{ref}.Ωgt__20^ doesn't match", reverse rpr matcher    ### TAINT to be replaced ###
+          @fail "#{ref}.Ωgt__21", 'neq', "error #{rpr error.message} doesn't match #{rpr matcher}"
         else
-          @fail "#{ref} ◀ Ωgt__22", 'type', "expected a regex or a text, got a #{matcher_type}"
+          @fail "#{ref}.Ωgt__22", 'type', "expected a regex or a text, got a #{matcher_type}"
     #.......................................................................................................
     unless error?
-      @fail "#{ref} ◀ Ωgt__23", 'noerr', "expected an error but none was thrown"
+      @fail "#{ref}.Ωgt__23", 'noerr', "expected an error but none was thrown"
     #.......................................................................................................
     return null
 
@@ -319,21 +320,21 @@ class Test
     catch error
       #.....................................................................................................
       unless matcher?
-        @pass "#{ref} ◀ Ωgt__24", 'error ok', "did throw #{rpr error.message}"
+        @pass "#{ref}.Ωgt__24", 'error ok', "did throw #{rpr error.message}"
         return null
       #.....................................................................................................
       switch matcher_type = @_match_error error, matcher
         when true
-          @pass "#{ref} ◀ Ωgt__25", 'error ok', "did throw #{rpr error.message}"
+          @pass "#{ref}.Ωgt__25", 'error ok', "did throw #{rpr error.message}"
         when false
-          urge "#{ref} ◀ Ωgt__26 error        ", reverse error.message
-          warn "#{ref} ◀ Ωgt__27 doesn't match", reverse rpr matcher
-          @fail "#{ref} ◀ Ωgt__28", 'error nok', "did throw but not match #{rpr error.message}"
+          urge "#{ref}.Ωgt__26 error        ", reverse error.message
+          warn "#{ref}.Ωgt__27 doesn't match", reverse rpr matcher
+          @fail "#{ref}.Ωgt__28", 'error nok', "did throw but not match #{rpr error.message}"
         else
-          @fail "#{ref} ◀ Ωgt__29", 'fail', "expected a regex or a text for matcher, got a #{matcher_type}"
+          @fail "#{ref}.Ωgt__29", 'fail', "expected a regex or a text for matcher, got a #{matcher_type}"
     #.......................................................................................................
     unless error?
-      @fail "#{ref} ◀ Ωgt__30", 'missing', "expected an error but none was thrown, instead got result #{rpr result}"
+      @fail "#{ref}.Ωgt__30", 'missing', "expected an error but none was thrown, instead got result #{rpr result}"
     #.......................................................................................................
     return null
 
