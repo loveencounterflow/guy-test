@@ -11,7 +11,7 @@ GUY                       = require 'guy'
   praise
   urge
   warn
-  whisper }               = GUY.trm.get_loggers 'guy-test-NG'
+  whisper }               = GUY.trm.get_loggers 'GT'
 { rpr
   inspect
   echo
