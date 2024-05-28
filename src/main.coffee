@@ -247,6 +247,7 @@ class Test
       message = "expected a result but got an an error: #{rpr error.message}"
       @fail "#{ref} ◀ Ωgt__12", 'error', message
       throw new Error message if test_mode is 'throw_errors'
+      return null
     #.......................................................................................................
     if @equals result, matcher
       @pass ref, "EQ OK"
