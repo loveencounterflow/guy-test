@@ -141,6 +141,8 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 * **[–]** use call to `Tests::_warn()` to also display warning when so configured
 * **[–]** introduce methods to also display ongoing messages when so configured
 * **[–]** standardize handling and display of compound refs (using dot notation or slashes)
+* **[–]** use wrapping methods to set and reset task ref as state to consolidate internal formation of
+  compound refs
 
 <!-- ## Is Done -->
 
