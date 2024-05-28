@@ -143,6 +143,7 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 * **[–]** standardize handling and display of compound refs (using dot notation or slashes)
 * **[–]** use wrapping methods to set and reset task ref as state to consolidate internal formation of
   compound refs
+* **[–]** standardize `cat`s, choose better name
 
 <!-- ## Is Done -->
 
