@@ -269,8 +269,8 @@ class Test
     return matcher_type
 
   #---------------------------------------------------------------------------------------------------------
-    throw new Error "^992-1^ test method should be named, got #{rpr f}" if ( ref = f.name ) is ''
   _throws: ( f, matcher ) ->
+    ref   = @_ref_from_function f
     error = null
     #.......................................................................................................
     try ( urge "^#{ref}^ `throws()` result of call:", f() ) catch error
@@ -305,8 +305,8 @@ class Test
       * failure otherwise
 
     ###
-    throw new Error "Ωgt__14 test method should be named, got #{rpr f}" if ( ref = f.name ) is ''
     ### TAINT check whether `f` is `asyncfunction`? ###
+    ref   = @_ref_from_function f
     error = null
     #.......................................................................................................
     try
