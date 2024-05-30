@@ -23,10 +23,7 @@ _jkequals                 = require '../deps/jkroso-equals'
 WG                        = require 'webguy'
 { nameit }                = WG.props
 { to_width }              = require 'to-width'
-### TAINT these should become instance configuration ###
-test_mode                 = 'throw_failures'
-test_mode                 = 'throw_errors'
-test_mode                 = 'failsafe'
+j                         = ( P... ) -> ( crumb for crumb in P when crumb? ).join '.'
 
 
 #===========================================================================================================
@@ -40,7 +37,8 @@ test_mode                 = 'failsafe'
       show_results:   'boolean'
       show_fails:     'boolean'
       show_passes:    'boolean'
-      throw_errors:   'boolean'
+      throw_on_error: 'boolean'
+      throw_on_fail:  'boolean'
       message_width:  'gt_message_width'
       prefix:         'text'
     template:
@@ -49,7 +47,8 @@ test_mode                 = 'failsafe'
       show_results:   true
       show_fails:     true
       show_passes:    true
-      throw_errors:   false
+      throw_on_error: false
+      throw_on_fail:  false
       message_width:  50
       prefix:         ''
   gt_stats:
@@ -72,35 +71,171 @@ test_mode                 = 'failsafe'
   #   template:
   #     prefix:   ''
 
+#===========================================================================================================
+class Assumptions
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( host, upref = null ) ->
+    hide @, '_', host
+    hide @, '_upref', upref
+    # hide @, 'pass',         nameit 'pass',          ( P... ) =>       @_pass          P...
+    # hide @, 'fail',         nameit 'fail',          ( P... ) =>       @_fail          P...
+    # hide @, 'eq',           nameit 'eq',            ( P... ) =>       @_eq            P...
+    # hide @, 'async_eq',     nameit 'async_eq',      ( P... ) =>       @_async_eq      P...
+    # hide @, 'throws',       nameit 'throws',        ( P... ) =>       @_throws        P...
+    # hide @, 'async_throws', nameit 'async_throws',  ( P... ) => await @_async_throws  P...
+    return undefined
+
+  #=========================================================================================================
+  pass: ( upref, cat, message = null ) ->
+    ref = ( j @_upref, upref )
+    # message ?= "(no message given)"
+    @_._increment_passes 'check', ref
+    if @_.cfg.show_passes
+      if message?
+        message = to_width message, @_.cfg.message_width
+        help ( j ref, 'Ωgt___1' ), cat, reverse " #{message} "
+      else
+        help ( j ref, 'Ωgt___2' ), cat
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  fail: ( upref, cat, message = null ) ->
+    ref = ( j @_upref, upref, 'Ωgt___3' )
+    @_._increment_fails 'check', ref
+    @_._warn ref, if message? then "(#{cat}) #{message}" else cat
+    if @_.cfg.show_fails
+      if message?
+        message = to_width message, @_.cfg.message_width
+        warn ref, cat, reverse " #{message} "
+      else
+        warn ref, cat
+    return null
+
+  #=========================================================================================================
+  eq: ( f, matcher ) ->
+    ref = ( j @_upref, @_._ref_from_function f )
+    #.......................................................................................................
+    try ( result = f.call @, @ ) catch error
+      message = "expected a result but got an an error: #{rpr error.message}"
+      @fail 'Ωgt___4', 'error', message
+      throw new Error message if @_.cfg.throw_on_error
+      return null
+    #.......................................................................................................
+    return @pass ( j ref, 'Ωgt___5' ), 'eq' if @_.equals result, matcher
+    #.......................................................................................................
+    warn ( j ref, 'Ωgt___6' ), ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
+    warn ( j ref, 'Ωgt___7' ), ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
+    @fail 'Ωgt___8', 'neq'
+    if @_.cfg.throw_on_fail
+      message = "neq:\nresult:     #{rpr result}\nmatcher:    #{matcher}"
+      throw new Error message
+    #.......................................................................................................
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  async_eq: ( f, matcher ) -> throw new Error "not implemented"
+
+  #=========================================================================================================
+  throws: ( f, matcher ) ->
+    ref   = @_._ref_from_function f
+    error = null
+    #.......................................................................................................
+    try ( urge "^#{ref}^ `throws()` result of call:", f.call @, @ ) catch error
+      unless matcher?
+        @pass "#{ref}.Ωgt___9", 'error ok', error.message
+        return null
+      #.....................................................................................................
+      switch matcher_type = @_._match_error error, matcher
+        when true
+          @pass 'Ωgt__10', 'error ok', error.message
+        when false
+          urge "^#{ref}.Ωgt__11^ error        ", reverse error.message  ### TAINT to be replaced ###
+          warn "^#{ref}.Ωgt__12^ doesn't match", reverse rpr matcher    ### TAINT to be replaced ###
+          @fail 'Ωgt__13', 'neq', "error #{rpr error.message} doesn't match #{rpr matcher}"
+        else
+          @fail 'Ωgt__14', 'type', "expected a regex or a text, got a #{matcher_type}"
+    #.......................................................................................................
+    unless error?
+      @fail 'Ωgt__15', 'noerr', "expected an error but none was thrown"
+    #.......................................................................................................
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  async_throws: ( f, matcher ) -> # new Promise ( resolve, reject ) =>
+    ###
+
+    * needs `f` to be an `asyncfunction` (although `function` will also work? better check anyway?)
+    * uses `try` / `except` clause to `await` `result` of calling `f`
+    * in case `result` is delivered, that's an error
+    * otherwise an `error` will be caught;
+      * success when `matcher` is missing, or else, when `matcher` describes `error.message`;
+      * failure otherwise
+
+    ###
+    ### TAINT check whether `f` is `asyncfunction`? ###
+    ref   = @_._ref_from_function f
+    error = null
+    #.......................................................................................................
+    try
+          ### TAINT provide custom context object containing current upref ###
+      result = await f.call @, @
+    #.......................................................................................................
+    catch error
+      #.....................................................................................................
+      unless matcher?
+        @pass 'Ωgt__16', 'error ok', "did throw #{rpr error.message}"
+        return null
+      #.....................................................................................................
+      switch matcher_type = @_._match_error error, matcher
+        when true
+          @pass 'Ωgt__17', 'error ok', "did throw #{rpr error.message}"
+        when false
+          urge "#{ref}.Ωgt__18 error        ", reverse error.message
+          warn "#{ref}.Ωgt__19 doesn't match", reverse rpr matcher
+          @fail 'Ωgt__20', 'error nok', "did throw but not match #{rpr error.message}"
+        else
+          @fail 'Ωgt__21', 'fail', "expected a regex or a text for matcher, got a #{matcher_type}"
+    #.......................................................................................................
+    unless error?
+      @fail 'Ωgt__22', 'missing', "expected an error but none was thrown, instead got result #{rpr result}"
+    #.......................................................................................................
+    return null
+
+  #=========================================================================================================
+  _match_error: ( error, matcher ) ->
+    switch matcher_type = type_of matcher
+      when 'text'
+        return error.message is matcher
+      when 'regex'
+        matcher.lastIndex = 0
+        return matcher.test error.message
+    return matcher_type
+
+
 
 #===========================================================================================================
-class Test
+class Test extends Assumptions
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
+    super null; @_ = @
     @cfg = Object.freeze create.gt_test_cfg cfg
     @totals = create.gt_totals()
     #.......................................................................................................
-    hide @, 'pass',         nameit 'pass',          ( P... ) =>       @_pass          P...
-    hide @, 'fail',         nameit 'fail',          ( P... ) =>       @_fail          P...
     hide @, 'test',         nameit 'test',          ( P... ) =>       @_test          P...
+    hide @, 'async_test',   nameit 'async_test',    ( P... ) => await @_async_test    P...
     hide @, 'report',       nameit 'report',        ( P... ) =>       @_report        P...
-    hide @, 'eq',           nameit 'eq',            ( P... ) =>       @_eq            P...
-    hide @, 'async_eq',     nameit 'async_eq',      ( P... ) =>       @_async_eq      P...
-    hide @, 'throws',       nameit 'throws',        ( P... ) =>       @_throws        P...
     hide @, 'equals',       nameit 'equals',        ( P... ) =>       @_equals        P...
     #.......................................................................................................
-    hide @, 'async_test',   nameit 'async_test',    ( P... ) => await @_async_test    P...
-    hide @, 'async_throws', nameit 'async_throws',  ( P... ) => await @_async_throws  P...
-    #.......................................................................................................
-    hide @, '_test_ref',                            null
+    hide @, '_KW_test_ref',                            '██_KW_test_ref'
     hide @, 'stats',                                { '*': @totals, }
     hide @, 'warnings',                             {}
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
   _test: ( tests... ) ->
-    @_test_inner tests...
+    @_test_inner null, tests...
     @report() if @cfg.show_report
     return @stats
 
@@ -111,30 +246,37 @@ class Test
     return @stats
 
   #---------------------------------------------------------------------------------------------------------
-  _test_inner: ( tests... ) ->
+  _test_inner: ( upref, tests... ) ->
     ### TAINT preliminary handling of arguments ###
     for candidate in tests then switch true
       #.....................................................................................................
       when isa.function candidate
-        @_test_ref = ref = @_ref_from_function candidate
-        # @_increment_tests 'test', ref
+        debug 'Ωgt__23', reverse { candidate, }
         try
-          candidate.call @
+          ### TAINT provide custom context object containing current upref ###
+          ctx = new Assumptions @, upref
+          candidate.call ctx
         catch error
-          @fail ref, 'error', "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
-        finally @_test_ref = null
+          ref     = ( j upref, 'Ωgt__24' )
+          message = "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
+          @fail ref, 'error', message
+          throw new Error message if @cfg.throw_on_error
       #.....................................................................................................
       when isa.object candidate
+        debug 'Ωgt__25', reverse { candidate, }
         for key, property of candidate
-          @_test_inner property
+          @_test_inner ( j upref, key ), property
       #.....................................................................................................
       when not candidate?
-        ref     = 'Ωgt___1'
+        debug 'Ωgt__26', reverse { candidate, }
+        ref     = ( j upref, 'Ωgt__27' )
         @fail ref, 'missing', "expected a test, got a #{type_of candidate}"
       #.....................................................................................................
       else
+        debug 'Ωgt__28', reverse { candidate, }
         ref     = @_ref_from_function candidate
-        ref     = 'Ωgt___2' if ref is 'anon'
+        # ref     = 'Ωgt__29' if ref is 'anon'
+        ref     = ( j upref, ref )
         @fail ref, 'type', "expected a test, got a #{type_of candidate}"
     #.......................................................................................................
     return null
@@ -144,12 +286,16 @@ class Test
     for candidate in tests then switch true
       #.....................................................................................................
       when isa.function candidate
-        @_test_inner candidate
+        @_test_inner ref, candidate
       #.....................................................................................................
       when isa.asyncfunction candidate
-        @_test_ref = @_ref_from_function candidate
-        # @_increment_tests 'test', @_test_ref
-        try await candidate.call @ catch error then finally @_test_ref = null
+        try
+          ### TAINT provide custom context object containing current upref ###
+          await candidate.call @
+        catch error
+          message = "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
+          @fail ref, 'error', message
+          throw new Error message if @cfg.throw_on_error
       #.....................................................................................................
       when isa.object candidate
         for key, property of candidate
@@ -199,31 +345,6 @@ class Test
   _increment_fails:   ( level, check_ref ) -> @_increment level, 'fails',  check_ref
 
   #---------------------------------------------------------------------------------------------------------
-  _pass: ( ref, cat, message = null ) ->
-    message ?= "(no message given)"
-    @_increment_passes 'check', ref
-    if @cfg.show_passes
-      if message?
-        message = to_width message, @cfg.message_width
-        help ref, cat, reverse " #{message} "
-      else
-        help ref, cat
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  _fail: ( ref, cat, message = null ) ->
-    @_increment_fails 'check', ref
-    ref = "#{@_test_ref}.#{ref}"
-    @_warn ref, if message? then "(#{cat}) #{message}" else cat
-    if @cfg.show_fails
-      if message?
-        message = to_width message, @cfg.message_width
-        warn ref, cat, reverse " #{message} "
-      else
-        warn ref, cat
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
   _increment: ( level, key, check_ref ) ->
     ### TAINT get rid of `level` kludge ###
     @totals[ key ]++
@@ -246,99 +367,6 @@ class Test
     # throw new Error "^992-1^ test method should be named, got #{rpr f}" if ( R = f.name ) is ''
     return R
 
-
-  #=========================================================================================================
-  _eq: ( f, matcher ) ->
-    ref = @_ref_from_function f
-    #.......................................................................................................
-    try ( result = f() ) catch error
-      message = "expected a result but got an an error: #{rpr error.message}"
-      @fail "#{ref}.Ωgt__12", 'error', message
-      throw new Error message if test_mode is 'throw_errors'
-      return null
-    #.......................................................................................................
-    return @pass "#{ref}.Ωgt__13", 'eq' if @equals result, matcher
-    #.......................................................................................................
-    warn "#{ref}.Ωgt__14", ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
-    warn "#{ref}.Ωgt__15", ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
-    @fail "#{ref}.Ωgt__16", 'neq'
-    #.......................................................................................................
-    return null
-
-  #=========================================================================================================
-  _match_error: ( error, matcher ) ->
-    switch matcher_type = type_of matcher
-      when 'text'
-        return error.message is matcher
-      when 'regex'
-        matcher.lastIndex = 0
-        return matcher.test error.message
-    return matcher_type
-
-  #---------------------------------------------------------------------------------------------------------
-  _throws: ( f, matcher ) ->
-    ref   = @_ref_from_function f
-    error = null
-    #.......................................................................................................
-    try ( urge "^#{ref}^ `throws()` result of call:", f() ) catch error
-      unless matcher?
-        @pass "#{ref}.Ωgt__17", 'error ok', error.message
-        return null
-      #.....................................................................................................
-      switch matcher_type = @_match_error error, matcher
-        when true
-          @pass "#{ref}.Ωgt__18", 'error ok', error.message
-        when false
-          urge "^#{ref}.Ωgt__19^ error        ", reverse error.message  ### TAINT to be replaced ###
-          warn "^#{ref}.Ωgt__20^ doesn't match", reverse rpr matcher    ### TAINT to be replaced ###
-          @fail "#{ref}.Ωgt__21", 'neq', "error #{rpr error.message} doesn't match #{rpr matcher}"
-        else
-          @fail "#{ref}.Ωgt__22", 'type', "expected a regex or a text, got a #{matcher_type}"
-    #.......................................................................................................
-    unless error?
-      @fail "#{ref}.Ωgt__23", 'noerr', "expected an error but none was thrown"
-    #.......................................................................................................
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  _async_throws: ( f, matcher ) -> # new Promise ( resolve, reject ) =>
-    ###
-
-    * needs `f` to be an `asyncfunction` (although `function` will also work? better check anyway?)
-    * uses `try` / `except` clause to `await` `result` of calling `f`
-    * in case `result` is delivered, that's an error
-    * otherwise an `error` will be caught;
-      * success when `matcher` is missing, or else, when `matcher` describes `error.message`;
-      * failure otherwise
-
-    ###
-    ### TAINT check whether `f` is `asyncfunction`? ###
-    ref   = @_ref_from_function f
-    error = null
-    #.......................................................................................................
-    try
-      result = await f()
-    #.......................................................................................................
-    catch error
-      #.....................................................................................................
-      unless matcher?
-        @pass "#{ref}.Ωgt__24", 'error ok', "did throw #{rpr error.message}"
-        return null
-      #.....................................................................................................
-      switch matcher_type = @_match_error error, matcher
-        when true
-          @pass "#{ref}.Ωgt__25", 'error ok', "did throw #{rpr error.message}"
-        when false
-          urge "#{ref}.Ωgt__26 error        ", reverse error.message
-          warn "#{ref}.Ωgt__27 doesn't match", reverse rpr matcher
-          @fail "#{ref}.Ωgt__28", 'error nok', "did throw but not match #{rpr error.message}"
-        else
-          @fail "#{ref}.Ωgt__29", 'fail', "expected a regex or a text for matcher, got a #{matcher_type}"
-    #.......................................................................................................
-    unless error?
-      @fail "#{ref}.Ωgt__30", 'missing', "expected an error but none was thrown, instead got result #{rpr result}"
-    #.......................................................................................................
-    return null
 
 
   #=========================================================================================================
