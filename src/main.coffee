@@ -157,7 +157,7 @@ class Test
       #.....................................................................................................
       else
         ref     = @_ref_from_function candidate
-        ref     = 'Ωgt___3' if ref is 'anon'
+        ref     = 'Ωgt__30' if ref is 'anon'
         @fail ref, 'type', "expected a test, got a #{type_of candidate}"
     #.......................................................................................................
     return null
@@ -170,25 +170,25 @@ class Test
     line        = gold '—————————————————————————————————————————————————————————————————'
     #.......................................................................................................
     show_totals = =>
-      whisper 'Ωgt___4 ' + @cfg.prefix, line
-      whisper 'Ωgt___5 ' + @cfg.prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
-      whisper 'Ωgt___6 ' + @cfg.prefix, line
+      whisper 'Ωgt__31 ' + @cfg.prefix, line
+      whisper 'Ωgt__32 ' + @cfg.prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
+      whisper 'Ωgt__33 ' + @cfg.prefix, line
       return null
     #.......................................................................................................
     whisper()
-    whisper 'Ωgt___7 ' + @cfg.prefix, line
-    whisper 'Ωgt___8 ' + @cfg.prefix, gold '                        🙤 GUY TEST 🙦'
-    whisper 'Ωgt___9 ' + @cfg.prefix, line
+    whisper 'Ωgt__34 ' + @cfg.prefix, line
+    whisper 'Ωgt__35 ' + @cfg.prefix, gold '                        🙤 GUY TEST 🙦'
+    whisper 'Ωgt__36 ' + @cfg.prefix, line
     color = if @totals.fails is 0 then 'lime' else 'red'
     for key, stats of @stats
       continue if key is '*'
-      whisper 'Ωgt__10 ' + @cfg.prefix, blue ( key.padEnd 20 ), stats
+      whisper 'Ωgt__37 ' + @cfg.prefix, blue ( key.padEnd 20 ), stats
     show_totals()
     repeat_totals = false
     for sub_ref, messages of @warnings
       repeat_totals = true
       for message in messages
-        whisper 'Ωgt__11 ' + @cfg.prefix, ( red sub_ref ), reverse red " #{message} "
+        whisper 'Ωgt__38 ' + @cfg.prefix, ( red sub_ref ), reverse red " #{message} "
     show_totals() if repeat_totals
     whisper()
     #.......................................................................................................
@@ -227,9 +227,9 @@ class Test
   _increment: ( level, key, check_ref ) ->
     ### TAINT get rid of `level` kludge ###
     @totals[ key ]++
-    per_test_stats  = @stats[ "#{@_test_ref}.*"             ] ?= create.gt_stats()
+    per_test_stats  = @stats[ "#{@_KW_test_ref}.*"             ] ?= create.gt_stats()
     if level is 'check'
-      per_check_stats = @stats[ "#{@_test_ref}.#{check_ref}"  ] ?= create.gt_stats()
+      per_check_stats = @stats[ "#{@_KW_test_ref}.#{check_ref}"  ] ?= create.gt_stats()
       unless key is 'tests'
         per_test_stats[ key ]++
         per_check_stats[ key ]++
