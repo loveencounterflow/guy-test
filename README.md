@@ -144,6 +144,13 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 * **[–]** use wrapping methods to set and reset task ref as state to consolidate internal formation of
   compound refs
 * **[–]** standardize `cat`s, choose better name
+* **[–]** replace `Tests::_test_ref` as it won't work in async tests
+* **[–]** call check methods with single argument `@`/`this` (conventional parameter `t` or `me`) so as to
+  allow bound check methods; also convenient for JavaScript where there are only fat-arrow functions
+* **[–]** modify behavior of assumptions (`eq()`, `throws()`, `async_eq()`, `async_throws()`, `pass()`,
+  `fail()`):
+  <!-- * **[–]** when a function is passed in, it will be called in the context of an 'assumptor' -->
+
 
 <!-- ## Is Done -->
 
