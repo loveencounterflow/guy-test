@@ -122,7 +122,7 @@ class Assumptions
       throw new Error message if @_.cfg.throw_on_error
       return null
     #.......................................................................................................
-    return @pass ( j ref, 'Ωgt___5' ), 'eq' if @_.equals result, matcher
+    return @pass 'Ωgt___5', 'eq' if @_.equals result, matcher
     #.......................................................................................................
     warn ( j ref, 'Ωgt___6' ), ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
     warn ( j ref, 'Ωgt___7' ), ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
@@ -138,26 +138,26 @@ class Assumptions
 
   #=========================================================================================================
   throws: ( f, matcher ) ->
-    ref   = @_._ref_from_function f
-    error = null
+    shortref  = @_._ref_from_function f
+    error     = null
     #.......................................................................................................
-    try ( urge "^#{ref}^ `throws()` result of call:", f.call @, @ ) catch error
+    try ( urge ( j @_upref, shortref, 'Ωgt___9' ), "`throws()` result of call:", rpr f.call @, @ ) catch error
       unless matcher?
-        @pass "#{ref}.Ωgt___9", 'error ok', error.message
+        @pass ( j shortref, 'Ωgt__10' ), 'error ok', error.message
         return null
       #.....................................................................................................
       switch matcher_type = @_._match_error error, matcher
         when true
-          @pass 'Ωgt__10', 'error ok', error.message
+          @pass ( j shortref, 'Ωgt__11' ), 'error ok', error.message
         when false
-          urge "^#{ref}.Ωgt__11^ error        ", reverse error.message  ### TAINT to be replaced ###
-          warn "^#{ref}.Ωgt__12^ doesn't match", reverse rpr matcher    ### TAINT to be replaced ###
-          @fail 'Ωgt__13', 'neq', "error #{rpr error.message} doesn't match #{rpr matcher}"
+          urge ( j @_upref, shortref, 'Ωgt__12' ), "error        ", reverse error.message  ### TAINT to be replaced ###
+          warn ( j @_upref, shortref, 'Ωgt__13' ), "doesn't match", reverse rpr matcher    ### TAINT to be replaced ###
+          @fail ( j shortref, 'Ωgt__14' ), 'neq', "error #{rpr error.message} doesn't match #{rpr matcher}"
         else
-          @fail 'Ωgt__14', 'type', "expected a regex or a text, got a #{matcher_type}"
+          @fail ( j shortref, 'Ωgt__15' ), 'type', "expected a regex or a text, got a #{matcher_type}"
     #.......................................................................................................
     unless error?
-      @fail 'Ωgt__15', 'noerr', "expected an error but none was thrown"
+      @fail ( j shortref, 'Ωgt__16' ), 'noerr', "expected an error but none was thrown"
     #.......................................................................................................
     return null
 
@@ -184,21 +184,21 @@ class Assumptions
     catch error
       #.....................................................................................................
       unless matcher?
-        @pass 'Ωgt__16', 'error ok', "did throw #{rpr error.message}"
+        @pass 'Ωgt__17', 'error ok', "did throw #{rpr error.message}"
         return null
       #.....................................................................................................
       switch matcher_type = @_._match_error error, matcher
         when true
-          @pass 'Ωgt__17', 'error ok', "did throw #{rpr error.message}"
+          @pass 'Ωgt__18', 'error ok', "did throw #{rpr error.message}"
         when false
-          urge "#{ref}.Ωgt__18 error        ", reverse error.message
-          warn "#{ref}.Ωgt__19 doesn't match", reverse rpr matcher
-          @fail 'Ωgt__20', 'error nok', "did throw but not match #{rpr error.message}"
+          urge "#{ref}.Ωgt__19 error        ", reverse error.message
+          warn "#{ref}.Ωgt__20 doesn't match", reverse rpr matcher
+          @fail 'Ωgt__21', 'error nok', "did throw but not match #{rpr error.message}"
         else
-          @fail 'Ωgt__21', 'fail', "expected a regex or a text for matcher, got a #{matcher_type}"
+          @fail 'Ωgt__22', 'fail', "expected a regex or a text for matcher, got a #{matcher_type}"
     #.......................................................................................................
     unless error?
-      @fail 'Ωgt__22', 'missing', "expected an error but none was thrown, instead got result #{rpr result}"
+      @fail 'Ωgt__23', 'missing', "expected an error but none was thrown, instead got result #{rpr result}"
     #.......................................................................................................
     return null
 
@@ -251,31 +251,31 @@ class Test extends Assumptions
     for candidate in tests then switch true
       #.....................................................................................................
       when isa.function candidate
-        debug 'Ωgt__23', reverse { candidate, }
+        debug 'Ωgt__24', reverse { candidate, }
         try
           ### TAINT provide custom context object containing current upref ###
           ctx = new Assumptions @, upref
           candidate.call ctx
         catch error
-          ref     = ( j upref, 'Ωgt__24' )
+          ref     = ( j upref, 'Ωgt__25' )
           message = "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
           @fail ref, 'error', message
           throw new Error message if @cfg.throw_on_error
       #.....................................................................................................
       when isa.object candidate
-        debug 'Ωgt__25', reverse { candidate, }
+        debug 'Ωgt__26', reverse { candidate, }
         for key, property of candidate
           @_test_inner ( j upref, key ), property
       #.....................................................................................................
       when not candidate?
-        debug 'Ωgt__26', reverse { candidate, }
-        ref     = ( j upref, 'Ωgt__27' )
+        debug 'Ωgt__27', reverse { candidate, }
+        ref     = ( j upref, 'Ωgt__28' )
         @fail ref, 'missing', "expected a test, got a #{type_of candidate}"
       #.....................................................................................................
       else
-        debug 'Ωgt__28', reverse { candidate, }
+        debug 'Ωgt__29', reverse { candidate, }
         ref     = @_ref_from_function candidate
-        # ref     = 'Ωgt__29' if ref is 'anon'
+        # ref     = 'Ωgt__30' if ref is 'anon'
         ref     = ( j upref, ref )
         @fail ref, 'type', "expected a test, got a #{type_of candidate}"
     #.......................................................................................................
@@ -303,7 +303,7 @@ class Test extends Assumptions
       #.....................................................................................................
       else
         ref     = @_ref_from_function candidate
-        ref     = 'Ωgt__30' if ref is 'anon'
+        ref     = 'Ωgt__31' if ref is 'anon'
         @fail ref, 'type', "expected a test, got a #{type_of candidate}"
     #.......................................................................................................
     return null
@@ -316,25 +316,25 @@ class Test extends Assumptions
     line        = gold '—————————————————————————————————————————————————————————————————'
     #.......................................................................................................
     show_totals = =>
-      whisper 'Ωgt__31 ' + @cfg.prefix, line
-      whisper 'Ωgt__32 ' + @cfg.prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
-      whisper 'Ωgt__33 ' + @cfg.prefix, line
+      whisper 'Ωgt__32 ' + @cfg.prefix, line
+      whisper 'Ωgt__33 ' + @cfg.prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
+      whisper 'Ωgt__34 ' + @cfg.prefix, line
       return null
     #.......................................................................................................
     whisper()
-    whisper 'Ωgt__34 ' + @cfg.prefix, line
-    whisper 'Ωgt__35 ' + @cfg.prefix, gold '                        🙤 GUY TEST 🙦'
-    whisper 'Ωgt__36 ' + @cfg.prefix, line
+    whisper 'Ωgt__35 ' + @cfg.prefix, line
+    whisper 'Ωgt__36 ' + @cfg.prefix, gold '                        🙤 GUY TEST 🙦'
+    whisper 'Ωgt__37 ' + @cfg.prefix, line
     color = if @totals.fails is 0 then 'lime' else 'red'
     for key, stats of @stats
       continue if key is '*'
-      whisper 'Ωgt__37 ' + @cfg.prefix, blue ( key.padEnd 20 ), stats
+      whisper 'Ωgt__38 ' + @cfg.prefix, blue ( key.padEnd 20 ), stats
     show_totals()
     repeat_totals = false
     for sub_ref, messages of @warnings
       repeat_totals = true
       for message in messages
-        whisper 'Ωgt__38 ' + @cfg.prefix, ( red sub_ref ), reverse red " #{message} "
+        whisper 'Ωgt__39 ' + @cfg.prefix, ( red sub_ref ), reverse red " #{message} "
     show_totals() if repeat_totals
     whisper()
     #.......................................................................................................
