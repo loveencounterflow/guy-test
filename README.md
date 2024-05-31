@@ -155,3 +155,5 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 <!-- ## Is Done -->
 
 <!-- * **[+]** ### -->
+
+* **[–]** rename either `@_upref` or `upref`
