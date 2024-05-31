@@ -49,7 +49,7 @@ j                         = ( P... ) -> ( crumb for crumb in P when crumb? ).joi
       show_passes:    true
       throw_on_error: false
       throw_on_fail:  false
-      message_width:  50
+      message_width:  300
       prefix:         ''
   gt_stats:
     fields:
@@ -89,24 +89,23 @@ class Assumptions
   #=========================================================================================================
   pass: ( upref, cat, message = null ) ->
     ref = ( j @_upref, upref )
-    # message ?= "(no message given)"
     @_._increment_passes 'check', ref
     if @_.cfg.show_passes
       if message?
-        message = to_width message, @_.cfg.message_width
-        help ( j ref, 'Ωgt___1' ), cat, reverse " #{message} "
+        message = @_to_message_width message
+        help ref, cat, reverse " #{message} "
       else
-        help ( j ref, 'Ωgt___2' ), cat
+        help ref, cat
     return null
 
   #---------------------------------------------------------------------------------------------------------
   fail: ( upref, cat, message = null ) ->
-    ref = ( j @_upref, upref, 'Ωgt___3' )
+    ref = ( j @_upref, upref )
     @_._increment_fails 'check', ref
     @_._warn ref, if message? then "(#{cat}) #{message}" else cat
     if @_.cfg.show_fails
       if message?
-        message = to_width message, @_.cfg.message_width
+        message = @_to_message_width message
         warn ref, cat, reverse " #{message} "
       else
         warn ref, cat
@@ -114,22 +113,21 @@ class Assumptions
 
   #=========================================================================================================
   eq: ( f, matcher ) ->
-    ref = ( j @_upref, @_._ref_from_function f )
+    shortref  = @_._ref_from_function f
+    ref       = ( j @_upref, shortref )
     #.......................................................................................................
     try ( result = f.call @, @ ) catch error
       message = "expected a result but got an an error: #{rpr error.message}"
-      @fail 'Ωgt___4', 'error', message
+      @fail shortref, 'error', message
       throw new Error message if @_.cfg.throw_on_error
       return null
     #.......................................................................................................
-    return @pass 'Ωgt___5', 'eq' if @_.equals result, matcher
+    return @pass shortref, 'eq' if @_.equals result, matcher
     #.......................................................................................................
-    warn ( j ref, 'Ωgt___6' ), ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
-    warn ( j ref, 'Ωgt___7' ), ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
-    @fail 'Ωgt___8', 'neq'
-    if @_.cfg.throw_on_fail
-      message = "neq:\nresult:     #{rpr result}\nmatcher:    #{matcher}"
-      throw new Error message
+    warn ref, ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
+    warn ref, ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
+    @fail shortref, 'neq'
+    throw new Error "neq:\nresult:     #{rpr result}\nmatcher:    #{matcher}" if @_.cfg.throw_on_fail
     #.......................................................................................................
     return null
 
@@ -139,25 +137,26 @@ class Assumptions
   #=========================================================================================================
   throws: ( f, matcher ) ->
     shortref  = @_._ref_from_function f
+    ref       = ( j @_upref, shortref )
     error     = null
     #.......................................................................................................
-    try ( urge ( j @_upref, shortref, 'Ωgt___9' ), "`throws()` result of call:", rpr f.call @, @ ) catch error
+    try ( urge ( j @_upref, shortref, 'Ωgt___1' ), "`throws()` result of call:", rpr f.call @, @ ) catch error
       unless matcher?
-        @pass ( j shortref, 'Ωgt__10' ), 'error ok', error.message
+        @pass shortref, 'error ok', error.message
         return null
       #.....................................................................................................
       switch matcher_type = @_._match_error error, matcher
         when true
-          @pass ( j shortref, 'Ωgt__11' ), 'error ok', error.message
+          @pass shortref, 'error ok', error.message
         when false
-          urge ( j @_upref, shortref, 'Ωgt__12' ), "error        ", reverse error.message  ### TAINT to be replaced ###
-          warn ( j @_upref, shortref, 'Ωgt__13' ), "doesn't match", reverse rpr matcher    ### TAINT to be replaced ###
-          @fail ( j shortref, 'Ωgt__14' ), 'neq', "error #{rpr error.message} doesn't match #{rpr matcher}"
+          urge ( j @_upref, shortref, 'Ωgt___2' ), "error        ", reverse error.message  ### TAINT to be replaced ###
+          warn ( j @_upref, shortref, 'Ωgt___3' ), "doesn't match", reverse rpr matcher    ### TAINT to be replaced ###
+          @fail shortref, 'neq', "error #{rpr error.message} doesn't match #{rpr matcher}"
         else
-          @fail ( j shortref, 'Ωgt__15' ), 'type', "expected a regex or a text, got a #{matcher_type}"
+          @fail shortref, 'type', "expected a regex or a text, got a #{matcher_type}"
     #.......................................................................................................
     unless error?
-      @fail ( j shortref, 'Ωgt__16' ), 'noerr', "expected an error but none was thrown"
+      @fail shortref, 'noerr', "expected an error but none was thrown"
     #.......................................................................................................
     return null
 
@@ -174,31 +173,31 @@ class Assumptions
 
     ###
     ### TAINT check whether `f` is `asyncfunction`? ###
-    ref   = @_._ref_from_function f
-    error = null
+    shortref  = @_._ref_from_function f
+    ref       = ( j @_upref, shortref )
+    error     = null
     #.......................................................................................................
     try
-          ### TAINT provide custom context object containing current upref ###
       result = await f.call @, @
     #.......................................................................................................
     catch error
       #.....................................................................................................
       unless matcher?
-        @pass 'Ωgt__17', 'error ok', "did throw #{rpr error.message}"
+        @pass shortref, 'error ok', "did throw #{rpr error.message}"
         return null
       #.....................................................................................................
       switch matcher_type = @_._match_error error, matcher
         when true
-          @pass 'Ωgt__18', 'error ok', "did throw #{rpr error.message}"
+          @pass shortref, 'error ok', "did throw #{rpr error.message}"
         when false
-          urge "#{ref}.Ωgt__19 error        ", reverse error.message
-          warn "#{ref}.Ωgt__20 doesn't match", reverse rpr matcher
-          @fail 'Ωgt__21', 'error nok', "did throw but not match #{rpr error.message}"
+          urge "#{ref}.Ωgt___6 error        ", reverse error.message
+          warn "#{ref}.Ωgt___7 doesn't match", reverse rpr matcher
+          @fail shortref, 'error nok', "did throw but not match #{rpr error.message}"
         else
-          @fail 'Ωgt__22', 'fail', "expected a regex or a text for matcher, got a #{matcher_type}"
+          @fail shortref, 'fail', "expected a regex or a text for matcher, got a #{matcher_type}"
     #.......................................................................................................
     unless error?
-      @fail 'Ωgt__23', 'missing', "expected an error but none was thrown, instead got result #{rpr result}"
+      @fail shortref, 'missing', "expected an error but none was thrown, instead got result #{rpr result}"
     #.......................................................................................................
     return null
 
@@ -211,6 +210,9 @@ class Assumptions
         matcher.lastIndex = 0
         return matcher.test error.message
     return matcher_type
+
+  #---------------------------------------------------------------------------------------------------------
+  _to_message_width: ( message ) -> ( to_width message, @_.cfg.message_width ).trimEnd()
 
 
 
@@ -241,7 +243,7 @@ class Test extends Assumptions
 
   #---------------------------------------------------------------------------------------------------------
   _async_test: ( tests... ) ->
-    await @_async_test_inner tests...
+    await @_async_test_inner null, tests...
     @report() if @cfg.show_report
     return @stats
 
@@ -251,59 +253,52 @@ class Test extends Assumptions
     for candidate in tests then switch true
       #.....................................................................................................
       when isa.function candidate
-        debug 'Ωgt__24', reverse { candidate, }
         try
-          ### TAINT provide custom context object containing current upref ###
           ctx = new Assumptions @, upref
-          candidate.call ctx
+          candidate.call ctx, ctx
         catch error
-          ref     = ( j upref, 'Ωgt__25' )
+          ref     = ( j upref, 'Ωgt___8' )
           message = "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
           @fail ref, 'error', message
           throw new Error message if @cfg.throw_on_error
       #.....................................................................................................
       when isa.object candidate
-        debug 'Ωgt__26', reverse { candidate, }
         for key, property of candidate
           @_test_inner ( j upref, key ), property
       #.....................................................................................................
       when not candidate?
-        debug 'Ωgt__27', reverse { candidate, }
-        ref     = ( j upref, 'Ωgt__28' )
+        ref     = ( j upref, 'Ωgt___9' )
         @fail ref, 'missing', "expected a test, got a #{type_of candidate}"
       #.....................................................................................................
       else
-        debug 'Ωgt__29', reverse { candidate, }
-        ref     = @_ref_from_function candidate
-        # ref     = 'Ωgt__30' if ref is 'anon'
-        ref     = ( j upref, ref )
+        ref = ( j upref, @_ref_from_function candidate )
         @fail ref, 'type', "expected a test, got a #{type_of candidate}"
     #.......................................................................................................
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _async_test_inner: ( tests... ) ->
+  _async_test_inner: ( upref, tests... ) ->
     for candidate in tests then switch true
       #.....................................................................................................
       when isa.function candidate
-        @_test_inner ref, candidate
+        await @_test_inner upref, candidate
       #.....................................................................................................
       when isa.asyncfunction candidate
         try
-          ### TAINT provide custom context object containing current upref ###
-          await candidate.call @
+          ctx = new Assumptions @, upref
+          await candidate.call ctx, ctx
         catch error
+          ref     = ( j upref, 'Ωgt__11' )
           message = "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
           @fail ref, 'error', message
           throw new Error message if @cfg.throw_on_error
       #.....................................................................................................
       when isa.object candidate
         for key, property of candidate
-          await @_async_test_inner property
+          await @_async_test_inner ( j upref, key ), property
       #.....................................................................................................
       else
-        ref     = @_ref_from_function candidate
-        ref     = 'Ωgt__31' if ref is 'anon'
+        ref = ( j upref, @_ref_from_function candidate )
         @fail ref, 'type', "expected a test, got a #{type_of candidate}"
     #.......................................................................................................
     return null
@@ -316,25 +311,25 @@ class Test extends Assumptions
     line        = gold '—————————————————————————————————————————————————————————————————'
     #.......................................................................................................
     show_totals = =>
-      whisper 'Ωgt__32 ' + @cfg.prefix, line
-      whisper 'Ωgt__33 ' + @cfg.prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
-      whisper 'Ωgt__34 ' + @cfg.prefix, line
+      whisper 'Ωgt__14 ' + @cfg.prefix, line
+      whisper 'Ωgt__15 ' + @cfg.prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
+      whisper 'Ωgt__16 ' + @cfg.prefix, line
       return null
     #.......................................................................................................
     whisper()
-    whisper 'Ωgt__35 ' + @cfg.prefix, line
-    whisper 'Ωgt__36 ' + @cfg.prefix, gold '                        🙤 GUY TEST 🙦'
-    whisper 'Ωgt__37 ' + @cfg.prefix, line
+    whisper 'Ωgt__17 ' + @cfg.prefix, line
+    whisper 'Ωgt__18 ' + @cfg.prefix, gold '                        🙤 GUY TEST 🙦'
+    whisper 'Ωgt__19 ' + @cfg.prefix, line
     color = if @totals.fails is 0 then 'lime' else 'red'
     for key, stats of @stats
       continue if key is '*'
-      whisper 'Ωgt__38 ' + @cfg.prefix, blue ( key.padEnd 20 ), stats
+      whisper 'Ωgt__20 ' + @cfg.prefix, blue ( key.padEnd 20 ), stats
     show_totals()
     repeat_totals = false
     for sub_ref, messages of @warnings
       repeat_totals = true
       for message in messages
-        whisper 'Ωgt__39 ' + @cfg.prefix, ( red sub_ref ), reverse red " #{message} "
+        whisper 'Ωgt__21 ' + @cfg.prefix, ( red sub_ref ), reverse red " #{message} "
     show_totals() if repeat_totals
     whisper()
     #.......................................................................................................
