@@ -55,8 +55,8 @@ Unit Tests for NodeJS and the Browser
   * **`@fail: ( ref, message )`**: to record a failure that may result from 'free-form' tests
 
 
-* task functions will called in the context of the `Test` instance to make the assumption methods available
-  as properties of `@`/`this`
+* task and probing functions will called in the context of the `Test` instance to make the assumption
+  methods available as properties of `@`/`this`
 
 ## Public API
 
