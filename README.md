@@ -11,6 +11,7 @@ Unit Tests for NodeJS and the Browser
 - [GuyTest](#guytest)
   - [Public API](#public-api)
   - [Results and Stats](#results-and-stats)
+  - [Proper Usage of Async Testing Methods](#proper-usage-of-async-testing-methods)
   - [Notes on Private API](#notes-on-private-api)
   - [To Do](#to-do)
 
@@ -74,6 +75,22 @@ Unit Tests for NodeJS and the Browser
 * for each test: count
   * how many passes and fails occurred
 
+## Proper Usage of Async Testing Methods
+
+```coffee
+af1 = ->       after 0.1, ->       throw new Error 'oops' ### not OK ###
+af2 = -> await after 0.1, ->       throw new Error 'oops' ### not OK ###
+af3 = ->       after 0.1, -> await throw new Error 'oops' ### OK ###
+af4 = -> await after 0.1, -> await throw new Error 'oops' ### OK ###
+# debug 'Ω_101', validate.asyncfunction af
+f1 = ->
+  try
+    result = await af2()
+  catch error
+    warn error.message
+  help result
+await f1()
+```
 
 ## Notes on Private API
 
@@ -157,3 +174,5 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 <!-- * **[+]** ### -->
 
 * **[–]** rename either `@_upref` or `upref`
+* **[–]** should an `asyncfunction` be required for check functions used with `async_eq()`,
+  `async_throws()`?
