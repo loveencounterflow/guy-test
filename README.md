@@ -14,6 +14,7 @@ Unit Tests for NodeJS and the Browser
   - [Proper Usage of Async Testing Methods](#proper-usage-of-async-testing-methods)
   - [Notes on Private API](#notes-on-private-api)
   - [To Do](#to-do)
+  - [Is Done](#is-done)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -120,23 +121,12 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 * **[–]** consider to move equality testing so its use doesn't depend on `Test` instance
 * **[–]** custom error classes
 * **[–]** provide stats per module, per method and totals
-* **[–]** include message with each fail
 * **[–]** use proper namespacing for types
-* **[–]** remove `? {}` in `create.gt_report_cfg cfg ? {}` in `_report()` after bug fixed in InterType
-* **[–]** consolidate calls to `Test::_increment_fails()`, `warn()`, `Test::_warn()` into single call
 * **[–]** make sure ref is available in warnings at least when iterating over object properties
-* **[–]** avoid `null` as ref for test
-* **[–]** use 'task' as a better synonym for the ubiquitous 'test'
-* **[–]** restructure use of `t2` in tests to run inside of named functions
-* **[–]** use `_record_failure()` &c instead of `_increment_fails()` to do all the associated tasks in one
-  step
-  * **[–]** get rid of `level` kludge in `_increment()`, preferrably by using more specialized methods
-* **[–]** list all the steps to be taken by `_record_failure()` and related methods, arguments needed
 * **[–]** confirm that running `Test::test()` and / or `Test::async_test()` repeatedly on same instance sums
   up all stats, introduce counter to count the times one of these methods is called; what about using only
   assumptions such as `test.eq()` on their own outside of a call to `Test::test()` and / or
   `Test::async_test()`?
-* **[–]** <del>implement a `Test::clear()` method to reset stats?</del>
 * **[–]** rename `Test` class to something more meaningful(?)
 * **[–]** rename parameter `f` in assumption methods to `check`
 * **[–]** allow to pass in multiple matchers to `Test::throws()`, `Test::async_throws()` so we can check
@@ -153,26 +143,35 @@ browserify --require intertype --debug -o public/browserified/intertype.js
   * `show_fails: true,`
   * `show_passes: true,`
   * `throw_errors: false,`
-* **[–]** check tha three-argument style calling is used everywhere for `Test::pass()` and `Test::fail()`,
+* **[–]** check that three-argument style calling is used everywhere for `Test::pass()` and `Test::fail()`,
   including in tests, docs
 * **[–]** use call to `Tests::_warn()` to also display warning when so configured
 * **[–]** introduce methods to also display ongoing messages when so configured
-* **[–]** standardize handling and display of compound refs (using dot notation or slashes)
 * **[–]** use wrapping methods to set and reset task ref as state to consolidate internal formation of
   compound refs
 * **[–]** standardize `cat`s, choose better name
 * **[–]** replace `Tests::_test_ref` as it won't work in async tests
-* **[–]** call check methods with single argument `@`/`this` (conventional parameter `t` or `me`) so as to
-  allow bound check methods; also convenient for JavaScript where there are only fat-arrow functions
 * **[–]** modify behavior of assumptions (`eq()`, `throws()`, `async_eq()`, `async_throws()`, `pass()`,
   `fail()`):
   <!-- * **[–]** when a function is passed in, it will be called in the context of an 'assumptor' -->
-
-
-<!-- ## Is Done -->
-
-<!-- * **[+]** ### -->
-
 * **[–]** rename either `@_upref` or `upref`
-* **[–]** should an `asyncfunction` be required for check functions used with `async_eq()`,
-  `async_throws()`?
+
+
+## Is Done
+
+* **[+]** <del>should an `asyncfunction` be required for check functions used with `async_eq()`,
+  `async_throws()`?</del> <ins>doesn't work, cf. tests where timeout (`after()`) is used</ins>
+* **[+]** include message with each fail
+* **[+]** call check methods with single argument `@`/`this` (conventional parameter `t` or `me`) so as to
+  allow bound check methods; also convenient for JavaScript where there are only fat-arrow functions
+* **[+]** standardize handling and display of compound refs (using dot notation or slashes)
+* **[+]** <del>implement a `Test::clear()` method to reset stats?</del>
+* **[+]** use `_record_failure()` &c instead of `_increment_fails()` to do all the associated tasks in one
+  step
+  * **[+]** get rid of `level` kludge in `_increment()`, preferrably by using more specialized methods
+* **[+]** list all the steps to be taken by `_record_failure()` and related methods, arguments needed
+* **[+]** remove `? {}` in `create.gt_report_cfg cfg ? {}` in `_report()` after bug fixed in InterType
+* **[+]** consolidate calls to `Test::_increment_fails()`, `warn()`, `Test::_warn()` into single call
+* **[+]** avoid `null` as ref for test
+* **[+]** use 'task' as a better synonym for the ubiquitous 'test'
+* **[+]** restructure use of `t2` in tests to run inside of named functions
