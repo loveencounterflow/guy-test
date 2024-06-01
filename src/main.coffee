@@ -132,7 +132,24 @@ class Assumptions
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  async_eq: ( f, matcher ) -> throw new Error "not implemented"
+  async_eq: ( f, matcher ) ->
+    shortref  = @_._ref_from_function f
+    ref       = ( j @_upref, shortref )
+    #.......................................................................................................
+    try ( result = await f.call @, @ ) catch error
+      message = "expected a result but got an an error: #{rpr error.message}"
+      @fail shortref, 'error', message
+      throw new Error message if @_.cfg.throw_on_error
+      return null
+    #.......................................................................................................
+    return @pass shortref, 'eq' if @_.equals result, matcher
+    #.......................................................................................................
+    warn ref, ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
+    warn ref, ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
+    @fail shortref, 'neq'
+    throw new Error "neq:\nresult:     #{rpr result}\nmatcher:    #{matcher}" if @_.cfg.throw_on_fail
+    #.......................................................................................................
+    return null
 
   #=========================================================================================================
   throws: ( f, matcher ) ->
