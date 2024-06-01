@@ -89,7 +89,7 @@ class Assumptions
   #=========================================================================================================
   pass: ( upref, cat, message = null ) ->
     ref = ( j @_upref, upref )
-    @_._increment_passes 'check', ref
+    @_._increment_passes ref
     if @_.cfg.show_passes
       if message?
         message = @_to_message_width message
@@ -101,7 +101,7 @@ class Assumptions
   #---------------------------------------------------------------------------------------------------------
   fail: ( upref, cat, message = null ) ->
     ref = ( j @_upref, upref )
-    @_._increment_fails 'check', ref
+    @_._increment_fails ref
     @_._warn ref, if message? then "(#{cat}) #{message}" else cat
     if @_.cfg.show_fails
       if message?
@@ -336,19 +336,14 @@ class Test extends Assumptions
     return @stats
 
   #---------------------------------------------------------------------------------------------------------
-  _increment_passes:  ( level, check_ref ) -> @_increment level, 'passes', check_ref
-  _increment_fails:   ( level, check_ref ) -> @_increment level, 'fails',  check_ref
+  _increment_passes:  ( check_ref ) -> @_increment 'passes', check_ref
+  _increment_fails:   ( check_ref ) -> @_increment 'fails',  check_ref
 
   #---------------------------------------------------------------------------------------------------------
-  _increment: ( level, key, check_ref ) ->
-    ### TAINT get rid of `level` kludge ###
-    @totals[ key ]++
-    per_test_stats  = @stats[ "#{@_KW_test_ref}.*"             ] ?= create.gt_stats()
-    if level is 'check'
-      per_check_stats = @stats[ "#{@_KW_test_ref}.#{check_ref}"  ] ?= create.gt_stats()
-      unless key is 'tests'
-        per_test_stats[ key ]++
-        per_check_stats[ key ]++
+  _increment: ( pass_or_fail, check_ref ) ->
+    per_check_stats = @stats[ check_ref ] ?= create.gt_stats()
+    per_check_stats[  pass_or_fail ]++
+    @totals[          pass_or_fail ]++
     return null
 
   #---------------------------------------------------------------------------------------------------------
