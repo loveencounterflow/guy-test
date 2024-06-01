@@ -9,6 +9,8 @@ Unit Tests for NodeJS and the Browser
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [GuyTest](#guytest)
+  - [██████████████](#%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88)
+  - [Suggested Organization of Tests](#suggested-organization-of-tests)
   - [Public API](#public-api)
   - [Results and Stats](#results-and-stats)
   - [Proper Usage of Async Testing Methods](#proper-usage-of-async-testing-methods)
@@ -20,6 +22,8 @@ Unit Tests for NodeJS and the Browser
 
 
 # GuyTest
+
+## ██████████████
 
 * a 'test' is a single run of one or more 'tasks'
 * a 'task' is a named function with any number of named 'checks'
@@ -59,6 +63,50 @@ Unit Tests for NodeJS and the Browser
 
 * task and probing functions will called in the context of the `Test` instance to make the assumption
   methods available as properties of `@`/`this`
+
+## Suggested Organization of Tests
+
+* use simple objects whose properties are tasks
+* properties can also recursively be objects with tasks, this allows for hierarchical structure that will be
+  reflected in the names of tasks and checks in the result display
+* start test by passing in your task objects, preferrably by wrapping the (outermost) task objects in an
+  ad-hoc objects so you get meaningful names:
+
+  ```coffee
+  taskgroup_A =
+    test_1: -> ...
+    better_use_meaningful_names: ->
+      @eq ( t__20 = -> my_math_lib.mul 3, 4 ), 12
+      @eq ( t__21 = -> my_math_lib.add 3, 4 ), 7
+    subgroup:
+      foo: -> ...
+      bar: -> ...
+
+  taskgroup_B = ...
+
+  ( new Test() ).test { taskgroup_A, taskgroup_B, }
+
+  # or, as the case may be:
+
+  await ( new Test() ).async_test { taskgroup_A, taskgroup_B, }
+  ```
+
+  The report will then show, among other things:
+
+  ```
+  —————————————————————————————————————————————————————————————————
+                          🙤 GUY TEST 🙦
+  —————————————————————————————————————————————————————————————————
+  ...
+  taskgroup_A.better_use_meaningful_names.t__20 { passes: 1, fails: 0 }
+  taskgroup_A.better_use_meaningful_names.t__21 { passes: 1, fails: 0 }
+  ...
+  —————————————————————————————————————————————————————————————————
+  *                    { passes: 298, fails: 2 }
+  —————————————————————————————————————————————————————————————————
+  ```
+
+
 
 ## Public API
 
@@ -135,7 +183,6 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 * **[–]** methods `Types::pass()`, `Types::fail()` whould take three arguments `ref`, `cat` and `message`;
   there could be an additional method `Types::fail_eq()` to display two lines with first cat `result` or
   `error`, second cat with `doesn't match`
-* **[–]** can tasks be nested? Does it make sense to have one task call one or more other tasks?
 * **[–]** implement instance-level and check-level configuration:
   * `auto_reset: false,`
   * `show_report: true,`
@@ -175,3 +222,4 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 * **[+]** avoid `null` as ref for test
 * **[+]** use 'task' as a better synonym for the ubiquitous 'test'
 * **[+]** restructure use of `t2` in tests to run inside of named functions
+* **[+]** can tasks be nested? Does it make sense to have one task call one or more other tasks?
