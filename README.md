@@ -202,6 +202,11 @@ browserify --require intertype --debug -o public/browserified/intertype.js
   `fail()`):
   <!-- * **[–]** when a function is passed in, it will be called in the context of an 'assumptor' -->
 * **[–]** rename either `@_upref` or `upref`
+* **[–]** provide a simple, configurable way to run all tests in a given location, matching a glob &c so it
+  becomes easy to provide the code for a `test-all` module
+* **[–]** provide a directory/project with aliased versions of projects to allow for testing of past
+  versions; provide API to do that; PNPM CLI for this is `pnpm add
+  ${my-name}@npm:${registered-name}@${version}`, e.g. `pnpm add foo-3.2.1@npm:foo@3.2.1`
 
 
 ## Is Done
