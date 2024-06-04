@@ -274,7 +274,7 @@ class Test extends _Assumptions
           ctx = new _Assumptions @, upref
           candidate.call ctx, ctx
         catch error
-          ref     = ( j upref, 'Ωgt___8' )
+          ref     = ( j upref, 'Ωgt___6' )
           message = "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
           @fail ref, 'error', message
           throw new Error message if @cfg.throw_on_error
@@ -284,7 +284,7 @@ class Test extends _Assumptions
           @_test_inner ( j upref, key ), property
       #.....................................................................................................
       when not candidate?
-        ref     = ( j upref, 'Ωgt___9' )
+        ref     = ( j upref, 'Ωgt___7' )
         @fail ref, 'missing', "expected a test, got a #{type_of candidate}"
       #.....................................................................................................
       else
@@ -305,7 +305,7 @@ class Test extends _Assumptions
           ctx = new _Assumptions @, upref
           await candidate.call ctx, ctx
         catch error
-          ref     = ( j upref, 'Ωgt__10' )
+          ref     = ( j upref, 'Ωgt___8' )
           message = "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
           @fail ref, 'error', message
           throw new Error message if @cfg.throw_on_error
@@ -328,25 +328,25 @@ class Test extends _Assumptions
     line        = gold '—————————————————————————————————————————————————————————————————'
     #.......................................................................................................
     show_totals = =>
+      whisper 'Ωgt___9 ' + @cfg.prefix, line
+      whisper 'Ωgt__10 ' + @cfg.prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
       whisper 'Ωgt__11 ' + @cfg.prefix, line
-      whisper 'Ωgt__12 ' + @cfg.prefix, reverse GUY.trm[ color ] ( '*'.padEnd 20 ), @totals
-      whisper 'Ωgt__13 ' + @cfg.prefix, line
       return null
     #.......................................................................................................
     whisper()
+    whisper 'Ωgt__12 ' + @cfg.prefix, line
+    whisper 'Ωgt__13 ' + @cfg.prefix, gold '                        🙤 GUY TEST 🙦'
     whisper 'Ωgt__14 ' + @cfg.prefix, line
-    whisper 'Ωgt__15 ' + @cfg.prefix, gold '                        🙤 GUY TEST 🙦'
-    whisper 'Ωgt__16 ' + @cfg.prefix, line
     color = if @totals.fails is 0 then 'lime' else 'red'
     for key, stats of @stats
       continue if key is '*'
-      whisper 'Ωgt__17 ' + @cfg.prefix, blue ( key.padEnd 20 ), stats
+      whisper 'Ωgt__15 ' + @cfg.prefix, blue ( key.padEnd 20 ), stats
     show_totals()
     repeat_totals = false
     for sub_ref, messages of @warnings
       repeat_totals = true
       for message in messages
-        whisper 'Ωgt__18 ' + @cfg.prefix, ( red sub_ref ), reverse red " #{message} "
+        whisper 'Ωgt__16 ' + @cfg.prefix, ( red sub_ref ), reverse red " #{message} "
     show_totals() if repeat_totals
     whisper()
     #.......................................................................................................
