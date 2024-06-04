@@ -207,6 +207,27 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 * **[–]** provide a directory/project with aliased versions of projects to allow for testing of past
   versions; provide API to do that; PNPM CLI for this is `pnpm add
   ${my-name}@npm:${registered-name}@${version}`, e.g. `pnpm add foo-3.2.1@npm:foo@3.2.1`
+* **[–]** use `dbay` to store results, calculate totals
+* **[–]** provide hierarchical totals for each level
+* **[–]** before calling a check function, print the current ref to the terminal; erase that line only when
+  terminated without error and replace with success message
+
+  ```bash
+  print("\u1b[1F")
+  #Moves cursor to beginning of the line n (default 1) lines up
+  print(str)   #prints the new line
+  print("\u1b[0K")
+  # clears  part of the line.
+  #If n is 0 (or missing), clear from cursor to the end of the line.
+  #If n is 1, clear from cursor to beginning of the line.
+  #If n is 2, clear entire line.
+  #Cursor position does not change.
+  ```
+
+  * see https://discourse.julialang.org/t/how-clear-the-printed-content-in-terminal-and-print-to-the-same-line/19549/3
+  * see https://stackoverflow.com/questions/1508490/erase-the-current-printed-console-line
+  * see https://www.reddit.com/r/C_Programming/comments/502xun/how_do_i_clear_a_line_on_console_in_c/
+  * see https://superuser.com/questions/1230544/is-there-any-way-to-clear-specific-number-of-lines-in-a-terminal
 
 
 ## Is Done
