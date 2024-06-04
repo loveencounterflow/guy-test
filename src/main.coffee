@@ -72,7 +72,7 @@ j                         = ( P... ) -> ( crumb for crumb in P when crumb? ).joi
   #     prefix:   ''
 
 #===========================================================================================================
-class Assumptions
+class _Assumptions
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( host, upref = null ) ->
@@ -234,7 +234,7 @@ class Assumptions
 
 
 #===========================================================================================================
-class Test extends Assumptions
+class Test extends _Assumptions
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
@@ -271,7 +271,7 @@ class Test extends Assumptions
       #.....................................................................................................
       when isa.function candidate
         try
-          ctx = new Assumptions @, upref
+          ctx = new _Assumptions @, upref
           candidate.call ctx, ctx
         catch error
           ref     = ( j upref, 'Ωgt___8' )
@@ -302,7 +302,7 @@ class Test extends Assumptions
       #.....................................................................................................
       when isa.asyncfunction candidate
         try
-          ctx = new Assumptions @, upref
+          ctx = new _Assumptions @, upref
           await candidate.call ctx, ctx
         catch error
           ref     = ( j upref, 'Ωgt__10' )
@@ -400,13 +400,4 @@ class Test extends Assumptions
 
 
 #===========================================================================================================
-t = new Test()
-module.exports = {
-  Test:         Test,
-  _TMP_test:    t,
-  test:         t.test,
-  async_test:   t.async_test,
-  equals:       t.equals,
-  eq:           t.eq,
-  throws:       t.throws,
-  async_throws: t.async_throws, }
+module.exports = { Test, _Assumptions, }
