@@ -9,8 +9,8 @@ dependencies:
     specifier: ^13.7.2
     version: 13.7.2(acorn-loose@8.4.0)(acorn-walk@8.3.2)(acorn@8.11.3)(astring@1.8.6)(chokidar@3.6.0)(dayjs@1.11.11)(tmp@0.2.3)
   intertype:
-    specifier: ^203.0.0
-    version: 203.0.0
+    specifier: ^203.2.0
+    version: 203.2.0
   to-width:
     specifier: ^1.2.0
     version: 1.2.0
@@ -141,8 +141,8 @@ packages:
       multimix: 5.0.0
     dev: false
 
-  /intertype@203.0.0:
-    resolution: {integrity: sha512-UzLQT/QOYxzxOTlEQZ/DhZqDdQMdwViST+0epT7Kqt1oo8e6Njr55HTdsbaElZ0Dh52eV3GtJZO4695fDR2DlA==}
+  /intertype@203.2.0:
+    resolution: {integrity: sha512-vGHyhV6I9V9zyEmcYsQvC/mTRVc9Gqx07GACxzKHDGjHY8RZXUgfleMajC2V4vdP3l8+03r2hPlQ5HBCEaQ0Kg==}
     dependencies:
       webguy: 5.2.1
     dev: false
