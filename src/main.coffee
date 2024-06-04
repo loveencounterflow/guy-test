@@ -27,7 +27,13 @@ j                         = ( P... ) -> ( crumb for crumb in P when crumb? ).joi
 
 
 #===========================================================================================================
-{ isa, type_of, validate, create, } = new Intertype
+types                     = new Intertype
+{ isa
+  type_of
+  validate
+  create                } = types
+#...........................................................................................................
+types.declare
   gt_message_width:
     test:             ( x ) -> ( @isa.cardinal x ) and x > 2
   gt_test_cfg:
@@ -78,6 +84,7 @@ class _Assumptions
   constructor: ( host, upref = null ) ->
     hide @, '_', host
     hide @, '_upref', upref
+    hide @, 'equals',       nameit 'equals',        ( P... ) =>       equals          P...
     # hide @, 'pass',         nameit 'pass',          ( P... ) =>       @_pass          P...
     # hide @, 'fail',         nameit 'fail',          ( P... ) =>       @_fail          P...
     # hide @, 'eq',           nameit 'eq',            ( P... ) =>       @_eq            P...
@@ -122,7 +129,7 @@ class _Assumptions
       throw new Error message if @_.cfg.throw_on_error
       return null
     #.......................................................................................................
-    return @pass shortref, 'eq' if @_.equals result, matcher
+    return @pass shortref, 'eq' if equals result, matcher
     #.......................................................................................................
     warn ref, ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
     warn ref, ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
@@ -142,7 +149,7 @@ class _Assumptions
       throw new Error message if @_.cfg.throw_on_error
       return null
     #.......................................................................................................
-    return @pass shortref, 'eq' if @_.equals result, matcher
+    return @pass shortref, 'eq' if equals result, matcher
     #.......................................................................................................
     warn ref, ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
     warn ref, ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
@@ -245,7 +252,6 @@ class Test extends _Assumptions
     hide @, 'test',         nameit 'test',          ( P... ) =>       @_test          P...
     hide @, 'async_test',   nameit 'async_test',    ( P... ) => await @_async_test    P...
     hide @, 'report',       nameit 'report',        ( P... ) =>       @_report        P...
-    hide @, 'equals',       nameit 'equals',        ( P... ) =>       @_equals        P...
     #.......................................................................................................
     hide @, '_KW_test_ref',                            '██_KW_test_ref'
     hide @, 'stats',                                { '*': @totals, }
@@ -376,28 +382,26 @@ class Test extends _Assumptions
 
 
 
-  #=========================================================================================================
-  # SET EQUALITY BY VALUE
-  #---------------------------------------------------------------------------------------------------------
-  _set_contains: ( set, value ) ->
-    for element from set
-      return true if @_equals element, value
-    return false
-
-  #---------------------------------------------------------------------------------------------------------
-  _sets_are_equal: ( a, b ) ->
-    return false unless isa.set b
-    return false unless a.size is b.size
-    for element from a
-      return false unless @_set_contains b, element
-    return true
-
-  #---------------------------------------------------------------------------------------------------------
-  _equals: ( a, b ) ->
-    return false unless ( type_of a ) is ( type_of b )
-    return @_sets_are_equal a, b if isa.set a
-    return _jkequals a, b
+#===========================================================================================================
+# SET EQUALITY BY VALUE
+#-----------------------------------------------------------------------------------------------------------
+equals = ( a, b ) ->
+  return false unless ( type_of_a = type_of a ) is ( type_of b )
+  return _sets_or_maps_are_equal a, b if ( type_of_a is 'set' ) or ( type_of_a is 'map' )
+  return _jkequals a, b
+#...........................................................................................................
+_set_or_map_contains = ( set, entry ) ->
+  for element from set
+    return true if equals element, entry
+  return false
+#...........................................................................................................
+_sets_or_maps_are_equal = ( a, b ) ->
+  ### TAINT only use if both a, b have same type and type is `set` or `map` ###
+  return false unless a.size is b.size
+  for element from a
+    return false unless _set_or_map_contains b, element
+  return true
 
 
 #===========================================================================================================
-module.exports = { Test, _Assumptions, }
+module.exports = { Test, _Assumptions, equals, _types: types, }
