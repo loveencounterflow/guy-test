@@ -12,6 +12,8 @@ Unit Tests for NodeJS and the Browser
   - [██████████████](#%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88)
   - [Suggested Organization of Tests](#suggested-organization-of-tests)
   - [Public API](#public-api)
+    - [Test Configuration](#test-configuration)
+    - [Running Tests](#running-tests)
   - [Results and Stats](#results-and-stats)
   - [Proper Usage of Async Testing Methods](#proper-usage-of-async-testing-methods)
   - [Notes on Private API](#notes-on-private-api)
@@ -110,8 +112,46 @@ Unit Tests for NodeJS and the Browser
 
 ## Public API
 
+### Test Configuration
+
+**NOTE** some of the below settings are not yet implemented
+
+* **`new Test: ( cfg ) ->`**: Perform tests, return statistics including total counts and per-test
+
+* **`auto_reset`**     (`false`): whether stats should be reset to zero whenever the `Test::test()` and
+  `Test::async_test()` methods is called
+* **`show_report`**    (`true`): whether to show totals when the `Test::test()` and `Test::async_test()`
+  methods terminates
+* **`show_results`**   (`true`): whether the outcome of each check should be printed to the terminal as soon
+  as it concludes
+* **`show_fails`**     (`true`): whether failed checks should be printed to the terminal
+* **`show_passes`**    (`true`): whether passed checks should be printed to the terminal
+* **`throw_on_error`** (`false`): whether an exception that is thrown from a check should cause the
+  `Test::test()` and `Test::async_test()` methods to throw that error; if set to `false`, such errors will
+  be caught and reported as `fail`s
+* **`throw_on_fail`**  (`false`): whether a `fail`ed assumption should cause the `Test::test()` and
+  `Test::async_test()` methods to throw an exception
+* **`message_width`**  (`300`): length limit on reported messages
+* **`prefix`**         (`''`): string to prefix each reported line with
+
+The settings below can also be used as third argument to the module-level `equals()` method:
+
+* **`ordered_objects`**  (`false`): whether to consider two objects as equal even when their epynomous
+  properties are not in the same order
+* **`ordered_sets`**     (`false`): whether to consider two sets as equal even when their epynomous elements
+  are not in the same order
+* **`ordered_maps`**     (`false`): whether to consider two maps as equal even when their epynomous key /
+  value pairs are not in the same order
+* **`signed_zero`**      (`false`): whether `+0` and `-0` should be considered equal
+
+
+### Running Tests
+
 * **`Test::test: ( tests... ) ->`**: Perform tests, return statistics including total counts and per-test
-  counts
+  counts. Only synchronous tasks and checks will be run; when asynchronous tasks or checks are encountered,
+  they will cause a `fail`
+
+* **`await Test::async_test: ( tests... ) ->`**: Perform asynchronous and synchronous tests
 
 ## Results and Stats
 
@@ -229,12 +269,11 @@ browserify --require intertype --debug -o public/browserified/intertype.js
   * see https://www.reddit.com/r/C_Programming/comments/502xun/how_do_i_clear_a_line_on_console_in_c/
   * see https://superuser.com/questions/1230544/is-there-any-way-to-clear-specific-number-of-lines-in-a-terminal
 
-* **[–]** implement configuration to enable distinguishing positive and negative zero, key ordering in
-  objects, sets and maps (call it 'strict' mode when all of the above are enabled)
 * **[–]** implement the ability to 'couple' a `Test` instance to another one such that past and future test
   results are transferred upstream; this will allow to perform different tests with different configurations
   and see all results in one summary nonetheless
 * **[–]** implement benchmarking for Hengist-NG
+* **[–]** implement remaining settings for `Test` CFG
 
 
 ## Is Done
@@ -256,3 +295,5 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 * **[+]** use 'task' as a better synonym for the ubiquitous 'test'
 * **[+]** restructure use of `t2` in tests to run inside of named functions
 * **[+]** can tasks be nested? Does it make sense to have one task call one or more other tasks?
+* **[+]** implement configuration to enable distinguishing positive and negative zero, key ordering in
+  objects, sets and maps (call it 'strict' mode when all of the above are enabled)
