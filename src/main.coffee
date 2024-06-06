@@ -19,6 +19,7 @@ GUY                       = require 'guy'
   log     }               = GUY.trm
 { Intertype }             = require 'intertype'
 _jkequals                 = require '../deps/jkroso-equals'
+_jktypeof                 = require '../deps/jkroso-type'
 { hide }                  = GUY.props
 WG                        = require 'webguy'
 { nameit }                = WG.props
@@ -47,6 +48,12 @@ types.declare
       throw_on_fail:  'boolean'
       message_width:  'gt_message_width'
       prefix:         'text'
+      #.....................................................................................................
+      # these should be mixed-in from `equals_cfg`_
+      ordered_objects:  'boolean'
+      ordered_sets:     'boolean'
+      ordered_maps:     'boolean'
+      signed_zero:      'boolean'
     template:
       auto_reset:     false
       show_report:    true
@@ -57,6 +64,12 @@ types.declare
       throw_on_fail:  false
       message_width:  300
       prefix:         ''
+      #.....................................................................................................
+      # these should be mixed-in from `equals_cfg`_
+      ordered_objects:  false
+      ordered_sets:     false
+      ordered_maps:     false
+      signed_zero:      false
   gt_stats:
     fields:
       passes:   'cardinal'
@@ -71,6 +84,17 @@ types.declare
     template:
       passes:   0
       fails:    0
+  equals_cfg:
+    fields:
+      ordered_objects:  'boolean'
+      ordered_sets:     'boolean'
+      ordered_maps:     'boolean'
+      signed_zero:      'boolean'
+    template:
+      ordered_objects:  false
+      ordered_sets:     false
+      ordered_maps:     false
+      signed_zero:      false
   # gt_report_cfg:
   #   fields:
   #     prefix:   'text'
@@ -84,7 +108,7 @@ class _Assumptions
   constructor: ( host, upref = null ) ->
     hide @, '_', host
     hide @, '_upref', upref
-    hide @, 'equals',       nameit 'equals',        ( P... ) =>       equals          P...
+    hide @, 'equals', nameit 'equals', ( a, b ) => equals a, b, @_.cfg
     # hide @, 'pass',         nameit 'pass',          ( P... ) =>       @_pass          P...
     # hide @, 'fail',         nameit 'fail',          ( P... ) =>       @_fail          P...
     # hide @, 'eq',           nameit 'eq',            ( P... ) =>       @_eq            P...
@@ -129,7 +153,7 @@ class _Assumptions
       throw new Error message if @_.cfg.throw_on_error
       return null
     #.......................................................................................................
-    return @pass shortref, 'eq' if equals result, matcher
+    return @pass shortref, 'eq' if @equals result, matcher
     #.......................................................................................................
     warn ref, ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
     warn ref, ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
@@ -149,7 +173,7 @@ class _Assumptions
       throw new Error message if @_.cfg.throw_on_error
       return null
     #.......................................................................................................
-    return @pass shortref, 'eq' if equals result, matcher
+    return @pass shortref, 'eq' if @equals result, matcher
     #.......................................................................................................
     warn ref, ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
     warn ref, ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
@@ -385,22 +409,55 @@ class Test extends _Assumptions
 #===========================================================================================================
 # SET EQUALITY BY VALUE
 #-----------------------------------------------------------------------------------------------------------
-equals = ( a, b ) ->
+equals = ( a, b, cfg ) ->
+  cfg = _create_equals_cfg cfg
+  if not cfg.signed_zero
+    return true if ( a is +0 ) and ( b is -0 )
+    return true if ( a is -0 ) and ( a is +0 )
   return false unless ( type_of_a = type_of a ) is ( type_of b )
-  return _sets_or_maps_are_equal a, b if ( type_of_a is 'set' ) or ( type_of_a is 'map' )
-  return _jkequals a, b
+  if ( type_of_a is 'set' )
+    return _ordered_sets_or_maps_are_equal    a, b, cfg if cfg.ordered_sets
+    return _unordered_sets_or_maps_are_equal  a, b, cfg
+  if ( type_of_a is 'map' )
+    return _ordered_sets_or_maps_are_equal    a, b, cfg if cfg.ordered_maps
+    return _unordered_sets_or_maps_are_equal  a, b, cfg
+  R = _jkequals a, b
+  #.........................................................................................................
+  ### TAINT this repeats work already done by _jkequals and should be implemented in that module ###
+  if R and cfg.ordered_objects and ( _jktypeof a ) is 'object'
+    return _jkequals ( k for k of a when k isnt 'constructor' ), ( k for k of b when k isnt 'constructor' )
+  #.........................................................................................................
+  return R
 #...........................................................................................................
-_set_or_map_contains = ( set, entry ) ->
-  for element from set
-    return true if equals element, entry
+_set_or_map_contains = ( set_or_map, element, cfg ) ->
+  for element_2 from set_or_map
+    if equals element_2, element, cfg
+      return true
   return false
 #...........................................................................................................
-_sets_or_maps_are_equal = ( a, b ) ->
+_ordered_sets_or_maps_are_equal = ( a, b, cfg ) ->
+  ### TAINT only use if both a, b have same type and type is `set` or `map` ###
+  return false unless a.size is b.size
+  idx = -1
+  entries_of_b = [ b..., ]
+  for element from a
+    idx++
+    return false unless equals element, entries_of_b[ idx ], cfg
+  return true
+#...........................................................................................................
+_unordered_sets_or_maps_are_equal = ( a, b, cfg ) ->
   ### TAINT only use if both a, b have same type and type is `set` or `map` ###
   return false unless a.size is b.size
   for element from a
-    return false unless _set_or_map_contains b, element
+    return false unless _set_or_map_contains b, element, cfg
   return true
+#...........................................................................................................
+_create_equals_cfg = ( cfg ) ->
+  return R if ( R = _known_equals_cfgs.get cfg )?
+  _known_equals_cfgs.set cfg, R = create.equals_cfg cfg
+  return R
+#...........................................................................................................
+_known_equals_cfgs = new Map()
 
 
 #===========================================================================================================
