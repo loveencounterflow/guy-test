@@ -229,6 +229,13 @@ browserify --require intertype --debug -o public/browserified/intertype.js
   * see https://www.reddit.com/r/C_Programming/comments/502xun/how_do_i_clear_a_line_on_console_in_c/
   * see https://superuser.com/questions/1230544/is-there-any-way-to-clear-specific-number-of-lines-in-a-terminal
 
+* **[–]** implement configuration to enable distinguishing positive and negative zero, key ordering in
+  objects, sets and maps (call it 'strict' mode when all of the above are enabled)
+* **[–]** implement the ability to 'couple' a `Test` instance to another one such that past and future test
+  results are transferred upstream; this will allow to perform different tests with different configurations
+  and see all results in one summary nonetheless
+* **[–]** implement benchmarking for Hengist-NG
+
 
 ## Is Done
 
