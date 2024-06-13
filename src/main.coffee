@@ -415,9 +415,8 @@ class Test extends _Assumptions
 #-----------------------------------------------------------------------------------------------------------
 equals = ( a, b, cfg ) ->
   cfg = _create_equals_cfg cfg
-  if not cfg.signed_zero
-    return true if ( a is +0 ) and ( b is -0 )
-    return true if ( a is -0 ) and ( a is +0 )
+  ### NOTE these comparisons disregard sign of zero ###
+  return true if ( not cfg.signed_zero ) and ( a is 0 ) and ( b is 0 )
   return false unless ( type_of_a = type_of a ) is ( type_of b )
   if ( type_of_a is 'set' )
     return _ordered_sets_or_maps_are_equal    a, b, cfg if cfg.ordered_sets
