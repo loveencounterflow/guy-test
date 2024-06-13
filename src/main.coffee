@@ -150,7 +150,8 @@ class _Assumptions
     try ( result = f.call @, @ ) catch error
       message = "expected a result but got an an error: #{rpr error.message}"
       @fail shortref, 'error', message
-      throw new Error message if @_.cfg.throw_on_error
+      if @_.cfg.throw_on_error
+        error.message = message; throw error
       return null
     #.......................................................................................................
     return @pass shortref, 'eq' if @equals result, matcher
@@ -170,7 +171,8 @@ class _Assumptions
     try ( result = await f.call @, @ ) catch error
       message = "expected a result but got an an error: #{rpr error.message}"
       @fail shortref, 'error', message
-      throw new Error message if @_.cfg.throw_on_error
+      if @_.cfg.throw_on_error
+        error.message = message; throw error
       return null
     #.......................................................................................................
     return @pass shortref, 'eq' if @equals result, matcher
@@ -307,7 +309,8 @@ class Test extends _Assumptions
           ref     = ( j upref, 'Ωgt___6' )
           message = "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
           @fail ref, 'error', message
-          throw new Error message if @cfg.throw_on_error
+          if @cfg.throw_on_error
+            error.message = message; throw error
       #.....................................................................................................
       when isa.object candidate
         for key, property of candidate
@@ -338,7 +341,8 @@ class Test extends _Assumptions
           ref     = ( j upref, 'Ωgt___8' )
           message = "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
           @fail ref, 'error', message
-          throw new Error message if @cfg.throw_on_error
+          if @cfg.throw_on_error
+            error.message = message; throw error
       #.....................................................................................................
       when isa.object candidate
         for key, property of candidate
