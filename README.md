@@ -274,6 +274,10 @@ browserify --require intertype --debug -o public/browserified/intertype.js
   and see all results in one summary nonetheless
 * **[–]** implement benchmarking for Hengist-NG
 * **[–]** implement remaining settings for `Test` CFG
+* **[–]** implement possibility to run preparation and finalization tasks by defining specially names
+  methods on test objects like `before_each_test()`, `after_each_test()`
+* **[–]** implement a way to 'accept' particular checks when they fail to indicate that these are known bugs
+  that are pending resolution in future releases
 
 
 ## Is Done
