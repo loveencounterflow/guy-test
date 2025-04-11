@@ -306,7 +306,8 @@ class Test extends _Assumptions
           ctx = new _Assumptions @, upref
           candidate.call ctx, ctx
         catch error
-          ref     = ( j upref, 'Ωgt___6' )
+          # ref     = ( j upref, 'Ωgt___6' )
+          ref     = upref
           message = "an unexpected error occurred when calling task #{rpr ref}; #{rpr error.message}"
           @fail ref, 'error', message
           if @cfg.throw_on_error
@@ -317,7 +318,8 @@ class Test extends _Assumptions
           @_test_inner ( j upref, key ), property
       #.....................................................................................................
       when not candidate?
-        ref     = ( j upref, 'Ωgt___7' )
+        # ref     = ( j upref, 'Ωgt___7' )
+        ref     = upref
         @fail ref, 'missing', "expected a test, got a #{type_of candidate}"
       #.....................................................................................................
       else
