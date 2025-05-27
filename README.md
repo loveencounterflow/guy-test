@@ -122,6 +122,8 @@ Unit Tests for NodeJS and the Browser
   `Test::async_test()` methods is called
 * **`show_report`**    (`true`): whether to show totals when the `Test::test()` and `Test::async_test()`
   methods terminates
+* **`report_checks`**  (`true`): whether to show an individual line for each check in the report even when
+  the check was successful
 * **`show_results`**   (`true`): whether the outcome of each check should be printed to the terminal as soon
   as it concludes
 * **`show_fails`**     (`true`): whether failed checks should be printed to the terminal
@@ -226,6 +228,7 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 * **[–]** implement instance-level and check-level configuration:
   * `auto_reset: false,`
   * `show_report: true,`
+  * `report_checks: true,`
   * `show_results: true,`
   * `show_fails: true,`
   * `show_passes: true,`
