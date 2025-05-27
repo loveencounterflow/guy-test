@@ -41,6 +41,7 @@ types.declare
     fields:
       auto_reset:     'boolean'
       show_report:    'boolean'
+      report_checks:  'boolean'
       show_results:   'boolean'
       show_fails:     'boolean'
       show_passes:    'boolean'
@@ -57,6 +58,7 @@ types.declare
     template:
       auto_reset:     false
       show_report:    true
+      report_checks:  true
       show_results:   true
       show_fails:     true
       show_passes:    true
@@ -372,11 +374,12 @@ class Test extends _Assumptions
     whisper()
     whisper 'Ωgt__12 ' + @cfg.prefix, line
     whisper 'Ωgt__13 ' + @cfg.prefix, gold '                        🙤 GUY TEST 🙦'
-    whisper 'Ωgt__14 ' + @cfg.prefix, line
     color = if @totals.fails is 0 then 'lime' else 'red'
-    for key, stats of @stats
-      continue if key is '*'
-      whisper 'Ωgt__15 ' + @cfg.prefix, blue ( key.padEnd 20 ), stats
+    if @cfg.report_checks
+      whisper 'Ωgt__14 ' + @cfg.prefix, line
+      for key, stats of @stats
+        continue if key is '*'
+        whisper 'Ωgt__15 ' + @cfg.prefix, blue ( key.padEnd 20 ), stats
     show_totals()
     repeat_totals = false
     for sub_ref, messages of @warnings
