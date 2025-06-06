@@ -290,12 +290,14 @@ class Test extends _Assumptions
   _test: ( tests... ) ->
     @_test_inner null, tests...
     @report() if @cfg.show_report
+    process.exitCode = 99 if @totals.fails isnt 0
     return @stats
 
   #---------------------------------------------------------------------------------------------------------
   _async_test: ( tests... ) ->
     await @_async_test_inner null, tests...
     @report() if @cfg.show_report
+    process.exitCode = 99 if @totals.fails isnt 0
     return @stats
 
   #---------------------------------------------------------------------------------------------------------
