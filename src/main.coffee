@@ -375,7 +375,7 @@ class Test extends _Assumptions
     #.......................................................................................................
     whisper()
     whisper 'Ωgt__12 ' + @cfg.prefix, line
-    whisper 'Ωgt__13 ' + @cfg.prefix, gold '                        🙤 GUY TEST 🙦'
+    whisper 'Ωgt__13 ' + @cfg.prefix, gold '                        🙤  GUY TEST 🙦'
     color = if @totals.fails is 0 then 'lime' else 'red'
     if @cfg.report_checks
       whisper 'Ωgt__14 ' + @cfg.prefix, line
