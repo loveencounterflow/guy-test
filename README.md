@@ -281,6 +281,11 @@ browserify --require intertype --debug -o public/browserified/intertype.js
   methods on test objects like `before_each_test()`, `after_each_test()`
 * **[–]** implement a way to 'accept' particular checks when they fail to indicate that these are known bugs
   that are pending resolution in future releases
+* **[–]** fix failing `@eq ( Ω__1 = -> { set: new Set(), } ), { set: new Set(), }`
+* **[–]** return `true`, `false` from `@eq()`, `@throws()` indicating success or failure
+  * **[–]** accept up to two results in `@eq()`, `@throws()`, one of which must be a wrapped `( @expect
+    [$name1]: $boolean, [$name2]: $boolean, ..., )` to indicate preconditions for a test; all preconditions
+    must evaluate to `true` or else the test is not run and fails
 
 
 ## Is Done
