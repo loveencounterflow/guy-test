@@ -469,6 +469,16 @@ _create_equals_cfg = ( cfg ) ->
 #...........................................................................................................
 _known_equals_cfgs = new Map()
 
+# #===========================================================================================================
+# # SET EQUALITY BY VALUE
+# #-----------------------------------------------------------------------------------------------------------
+# _equals = ( require 'node:util' ).isDeepStrictEqual
+# equals = ( a, b, cfg ) ->
+#   cfg = _create_equals_cfg cfg
+#   ### NOTE these comparisons disregard sign of zero ###
+#   return true if ( not cfg.signed_zero ) and ( a is 0 ) and ( b is 0 )
+#   return false unless ( type_of_a = type_of a ) is ( type_of b )
+#   return _equals a, b
 
 #===========================================================================================================
 module.exports = { Test, _Assumptions, equals, _types: types, }
