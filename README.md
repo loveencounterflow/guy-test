@@ -286,6 +286,9 @@ browserify --require intertype --debug -o public/browserified/intertype.js
   * **[–]** accept up to two results in `@eq()`, `@throws()`, one of which must be a wrapped `( @expect
     [$name1]: $boolean, [$name2]: $boolean, ..., )` to indicate preconditions for a test; all preconditions
     must evaluate to `true` or else the test is not run and fails
+* **[–]** implement equality testing with `{ isDeepStrictEqual: equals, } = require 'node:util'` (even
+  tests against symbol keys)
+* **[–]** implement `@true()`, `@false()`, `@neq()` (or `@ne()`?)
 
 
 ## Is Done
@@ -309,3 +312,4 @@ browserify --require intertype --debug -o public/browserified/intertype.js
 * **[+]** can tasks be nested? Does it make sense to have one task call one or more other tasks?
 * **[+]** implement configuration to enable distinguishing positive and negative zero, key ordering in
   objects, sets and maps (call it 'strict' mode when all of the above are enabled)
+* **[+]** skip tests marked as private by leading underscore; issue warning
