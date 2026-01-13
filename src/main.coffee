@@ -319,6 +319,9 @@ class Test extends _Assumptions
       #.....................................................................................................
       when isa.object candidate
         for key, property of candidate
+          if key.startsWith '_'
+            @_warn 'Ωgt___7', "skipped #{key}"
+            continue
           @_test_inner ( j upref, key ), property
       #.....................................................................................................
       when not candidate?
